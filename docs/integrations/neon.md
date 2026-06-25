@@ -1,8 +1,9 @@
 # Neon (Postgres)
 
-Hosted serverless Postgres. **Wired but feature-less today** — the only consumer is the
-`/health/db` connectivity check. No schema, ORM, or migrations yet; future data work
-(orders, etc.) builds on this client.
+Hosted serverless Postgres. Backs `/health/db`, **Neon Auth** (see
+[neon-auth.md](./neon-auth.md)), and the account-system tables (orders, addresses,
+profiles, rewards). Auth tables live in the `neon_auth` schema (owned by Neon Auth);
+our app tables live in `public`.
 
 ## Env vars
 
@@ -16,6 +17,11 @@ Hosted serverless Postgres. **Wired but feature-less today** — the only consum
   `DATABASE_URL` is unset) and `pingDb()` (`select 1`). This is the **pattern** every
   other integration follows.
 - `backend/src/app.ts` — `GET /health/db` and the `db` field of `/health/integrations`.
+- `backend/migrations/*.sql` + `backend/src/migrate.ts` — a tiny SQL migration runner
+  (numbered files, tracked in `_migrations`, applied in one transaction each; no-ops
+  without `DATABASE_URL`). Run: `pnpm --filter @pinprint/backend migrate`.
+- `backend/src/orders.ts`, `backend/src/accountStore.ts` — query modules (raw `sql\`…\``).
+- `backend/src/seed.ts` — demo data: `pnpm --filter @pinprint/backend seed [authUserId]`.
 
 ## Gotchas
 

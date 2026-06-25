@@ -4,6 +4,11 @@ import { geocodeReverse, geocodeSearch } from "./nominatim.js";
 import { pingDb } from "./db.js";
 import { constructWebhookEvent, isStripeConfigured } from "./stripe.js";
 import { isProdigiConfigured } from "./prodigi.js";
+import { isAuthConfigured } from "./auth.js";
+import { handleProdigiPayload, handleStripeEvent } from "./webhooks.js";
+import { buildAccountRouter } from "./routes/account.js";
+import { buildTrackRouter } from "./routes/track.js";
+import { buildDevRouter } from "./routes/dev.js";
 
 // The Pinprint API. Owns the Nominatim geocoding proxy (User-Agent, rate gate,
 // LRU cache live in ./nominatim) and the Neon connectivity check.
@@ -31,6 +36,7 @@ function registerRoutes(r: Hono): Hono {
       db: await pingDb(),
       stripe: isStripeConfigured(),
       prodigi: isProdigiConfigured(),
+      auth: isAuthConfigured(),
     }),
   );
 
@@ -40,18 +46,27 @@ function registerRoutes(r: Hono): Hono {
   r.post("/webhooks/stripe", async (c) => {
     const signature = c.req.header("stripe-signature");
     if (!signature) return c.json({ error: "missing_signature" }, 400);
+    let event;
     try {
       const raw = await c.req.text();
-      constructWebhookEvent(raw, signature);
+      event = constructWebhookEvent(raw, signature);
     } catch {
       return c.json({ error: "invalid_signature" }, 400);
     }
-    // TODO: handle event once the order flow exists.
+    // Persist the order transition. Never fail the webhook on a downstream/DB
+    // error — Stripe retries on non-2xx, and the handlers are idempotent. With
+    // DATABASE_URL unset this is a no-op (the order lookups return null).
+    try {
+      await handleStripeEvent(event);
+    } catch (err) {
+      console.error("[webhooks/stripe] handler error", err);
+    }
     return c.body(null, 204);
   });
 
-  // Prodigi status callback. Prodigi posts order status changes here. Accept
-  // valid JSON and 204; mapping stages to our order status is a TODO.
+  // Prodigi status callback. Prodigi posts order status changes here; we advance
+  // the matching order and append a tracking-timeline event. Always 204 (Prodigi
+  // retries on non-2xx); no-op when the order/DB is unconfigured.
   r.post("/webhooks/prodigi", async (c) => {
     let payload: unknown;
     try {
@@ -62,7 +77,11 @@ function registerRoutes(r: Hono): Hono {
     if (!payload || typeof payload !== "object") {
       return c.json({ error: "invalid_payload" }, 400);
     }
-    // TODO: handle Prodigi status callback once the order flow exists.
+    try {
+      await handleProdigiPayload(payload);
+    } catch (err) {
+      console.error("[webhooks/prodigi] handler error", err);
+    }
     return c.body(null, 204);
   });
 
@@ -92,6 +111,11 @@ function registerRoutes(r: Hono): Hono {
       return c.json({ error: "geocode_failed" }, 502);
     }
   });
+
+  // Account system. Fresh router instances per mount (registerRoutes runs twice).
+  r.route("/account", buildAccountRouter()); // authenticated (requireUser)
+  r.route("/track", buildTrackRouter()); // public order tracking
+  r.route("/dev", buildDevRouter()); // dev-only, DEV_SEED_TOKEN-guarded
 
   return r;
 }

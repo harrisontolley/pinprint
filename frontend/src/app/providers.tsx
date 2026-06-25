@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect } from "react";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
+import { AuthProvider } from "./auth-provider";
 
 // Client-side PostHog: product analytics + session replay + exception capture.
 // Env-guarded — with no NEXT_PUBLIC_POSTHOG_KEY this is a no-op passthrough, so the
@@ -28,6 +29,11 @@ export function Providers({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  if (!KEY) return <>{children}</>;
-  return <PHProvider client={posthog}>{children}</PHProvider>;
+  // AuthProvider always wraps the tree so Neon Auth context (UserButton, useSession,
+  // AuthView) is available everywhere; PostHog stays env-guarded inside it.
+  return (
+    <AuthProvider>
+      {KEY ? <PHProvider client={posthog}>{children}</PHProvider> : children}
+    </AuthProvider>
+  );
 }
