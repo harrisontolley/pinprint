@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { geocodeReverse, geocodeSearch } from "./nominatim.js";
 import { pingDb } from "./db.js";
+import { constructWebhookEvent, isStripeConfigured } from "./stripe.js";
+import { isProdigiConfigured } from "./prodigi.js";
 
 // The Pinprint API. Owns the Nominatim geocoding proxy (User-Agent, rate gate,
 // LRU cache live in ./nominatim) and the Neon connectivity check.
@@ -21,6 +23,48 @@ function registerRoutes(r: Hono): Hono {
   r.get("/health", (c) => c.json({ ok: true }));
 
   r.get("/health/db", async (c) => c.json({ ok: await pingDb() }));
+
+  // Readiness for every integration — which keys are configured, no external
+  // calls. Extends the /health/db convention as services are added.
+  r.get("/health/integrations", async (c) =>
+    c.json({
+      db: await pingDb(),
+      stripe: isStripeConfigured(),
+      prodigi: isProdigiConfigured(),
+    }),
+  );
+
+  // Stripe webhook. Signature verification needs the RAW body (see stripe.ts) —
+  // do not parse before verifying. Bad/missing signature → 400. Handling the
+  // event (e.g. payment_intent.succeeded → Prodigi order) comes with checkout.
+  r.post("/webhooks/stripe", async (c) => {
+    const signature = c.req.header("stripe-signature");
+    if (!signature) return c.json({ error: "missing_signature" }, 400);
+    try {
+      const raw = await c.req.text();
+      constructWebhookEvent(raw, signature);
+    } catch {
+      return c.json({ error: "invalid_signature" }, 400);
+    }
+    // TODO: handle event once the order flow exists.
+    return c.body(null, 204);
+  });
+
+  // Prodigi status callback. Prodigi posts order status changes here. Accept
+  // valid JSON and 204; mapping stages to our order status is a TODO.
+  r.post("/webhooks/prodigi", async (c) => {
+    let payload: unknown;
+    try {
+      payload = await c.req.json();
+    } catch {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    if (!payload || typeof payload !== "object") {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    // TODO: handle Prodigi status callback once the order flow exists.
+    return c.body(null, 204);
+  });
 
   r.get("/geocode/search", async (c) => {
     const q = (c.req.query("q") ?? "").trim();

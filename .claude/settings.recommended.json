@@ -1,0 +1,36 @@
+{
+  "//": "Recommended project harness config. NOT auto-loaded. To activate, review then run: cp .claude/settings.recommended.json .claude/settings.json (or merge into your own). It broadens the safe command allowlist so agent sessions prompt less, and adds a Stop hook that typechecks before a session ends. Activating it is your decision — it widens what an agent may run without asking.",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm test:run)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm dev *)",
+      "Bash(pnpm --filter *)",
+      "Bash(turbo *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(vercel env pull *)",
+      "Bash(vercel logs *)",
+      "Bash(stripe listen *)",
+      "Bash(stripe trigger *)",
+      "Bash(curl http://localhost:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm -s typecheck"
+          }
+        ]
+      }
+    ]
+  }
+}

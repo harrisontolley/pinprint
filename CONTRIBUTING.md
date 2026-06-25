@@ -6,10 +6,22 @@ Thanks for your interest in improving Pinprint!
 
 ```bash
 pnpm install
+git config core.hooksPath .githooks      # enable the secret-scan pre-commit hook
 pnpm dev          # frontend on :3000, backend on :8787
 ```
 
 Requires Node `>=20` and pnpm (see `packageManager` in `package.json`).
+
+### Secrets & integrations
+
+Secrets live in Vercel (source of truth). After `vercel login && vercel link`, pull
+them with `vercel env pull backend/.env` and `vercel env pull frontend/.env`. Never
+commit real keys — only `*.env.example` templates. Integration setup, gotchas, and
+verification steps live in [`docs/integrations/`](docs/integrations/README.md).
+
+Agents working in this repo: a recommended Claude harness config (broader command
+allowlist + a typecheck-on-stop hook) is in `.claude/settings.recommended.json` —
+review and copy it to `.claude/settings.json` to activate.
 
 ## Before opening a pull request
 
