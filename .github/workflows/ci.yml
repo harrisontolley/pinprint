@@ -11,6 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Secret scan
+        run: |
+          if git grep -nE 'sk_live_[A-Za-z0-9]{16,}|sk_test_[A-Za-z0-9]{16,}|rk_(live|test)_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{24,}|pk_live_[A-Za-z0-9]{16,}|phc_[A-Za-z0-9]{32,}' -- . ':!*.example'; then
+            echo "::error::Possible secret committed — see docs/integrations/secrets.md"
+            exit 1
+          fi
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4

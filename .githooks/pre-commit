@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Block commits that contain secret-shaped strings. Enable once with:
+#   git config core.hooksPath .githooks
+# Real keys are long + random, so the patterns require a realistic suffix length —
+# short placeholders in *.env.example and tests (e.g. sk_test_dummy) do NOT trip it.
+# False positive? Re-run with: git commit --no-verify
+set -euo pipefail
+
+patterns='sk_live_[A-Za-z0-9]{16,}|sk_test_[A-Za-z0-9]{16,}|rk_(live|test)_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{24,}|pk_live_[A-Za-z0-9]{16,}|phc_[A-Za-z0-9]{32,}'
+
+added=$(git diff --cached -U0 --diff-filter=ACM | grep -E '^\+' | grep -vE '^\+\+\+' || true)
+hits=$(printf '%s\n' "$added" | grep -En "$patterns" || true)
+
+if [ -n "$hits" ]; then
+  echo "✖ pre-commit: possible secret in staged changes:"
+  printf '%s\n' "$hits"
+  echo "Secrets belong in Vercel env, not git — see docs/integrations/secrets.md."
+  exit 1
+fi
+exit 0

@@ -15,6 +15,7 @@
     "@pinprint/shared": "workspace:*",
     "leaflet": "^1.9.4",
     "next": "16.2.9",
+    "posthog-js": "^1.393.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
