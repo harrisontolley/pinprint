@@ -1,0 +1,29 @@
+import { describe, it, expect } from "vitest";
+import { rectsOverlap } from "./aabb";
+
+const r = (x: number, y: number, w: number, h: number) => ({ x, y, w, h });
+
+describe("rectsOverlap", () => {
+  it("detects clearly overlapping rects", () => {
+    expect(rectsOverlap(r(0, 0, 10, 10), r(5, 5, 10, 10), 0)).toBe(true);
+  });
+
+  it("detects separated rects", () => {
+    expect(rectsOverlap(r(0, 0, 10, 10), r(20, 0, 10, 10), 0)).toBe(false);
+  });
+
+  it("treats edge-touching rects as non-overlapping at zero padding", () => {
+    expect(rectsOverlap(r(0, 0, 10, 10), r(10, 0, 10, 10), 0)).toBe(false);
+  });
+
+  it("expands the test by the padding on each side", () => {
+    // gap of 3px between right edge (10) and left edge (13)
+    expect(rectsOverlap(r(0, 0, 10, 10), r(13, 0, 10, 10), 2)).toBe(false);
+    expect(rectsOverlap(r(0, 0, 10, 10), r(13, 0, 10, 10), 4)).toBe(true);
+  });
+
+  it("requires overlap on both axes", () => {
+    // overlap on x but far apart on y
+    expect(rectsOverlap(r(0, 0, 10, 10), r(0, 100, 10, 10), 0)).toBe(false);
+  });
+});
