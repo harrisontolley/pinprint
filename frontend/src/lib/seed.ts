@@ -2,8 +2,8 @@ import type { Place } from "./types";
 
 // Showcase preset so the app opens populated and sellable. Home is New York (the
 // US-focused default); destinations spread arrows around the whole compass
-// (London ~NE, Miami ~S, Chicago/LA ~W, Seattle ~NW) and exercise all four tie
-// types in the legend.
+// (London ~NE, Bangkok/Tokyo ~NW great-circle, Miami ~S, Seattle ~NW) and
+// exercise all four tie types in the legend.
 
 export const SEED_HOME: Place = {
   id: "seed-nyc",
@@ -17,29 +17,29 @@ export const SEED_HOME: Place = {
 
 export const SEED_PLACES: Place[] = [
   {
-    id: "seed-chicago",
-    label: "Chicago",
-    fullName: "Chicago, Illinois, United States",
-    lat: 41.8781,
-    lng: -87.6298,
+    id: "seed-london",
+    label: "London",
+    fullName: "London, England, United Kingdom",
+    lat: 51.5074,
+    lng: -0.1278,
     kind: "city",
-    affiliation: "born",
+    affiliation: "visited",
   },
   {
-    id: "seed-la",
-    label: "Los Angeles",
-    fullName: "Los Angeles, California, United States",
-    lat: 34.0522,
-    lng: -118.2437,
+    id: "seed-bangkok",
+    label: "Bangkok",
+    fullName: "Bangkok, Thailand",
+    lat: 13.7563,
+    lng: 100.5018,
     kind: "city",
     affiliation: "family",
   },
   {
-    id: "seed-miami",
-    label: "Miami",
-    fullName: "Miami, Florida, United States",
-    lat: 25.7617,
-    lng: -80.1918,
+    id: "seed-tokyo",
+    label: "Tokyo",
+    fullName: "Tokyo, Japan",
+    lat: 35.6762,
+    lng: 139.6503,
     kind: "city",
     affiliation: "visited",
   },
@@ -53,12 +53,12 @@ export const SEED_PLACES: Place[] = [
     affiliation: "lived",
   },
   {
-    id: "seed-london",
-    label: "London",
-    fullName: "London, England, United Kingdom",
-    lat: 51.5074,
-    lng: -0.1278,
+    id: "seed-miami",
+    label: "Miami",
+    fullName: "Miami, Florida, United States",
+    lat: 25.7617,
+    lng: -80.1918,
     kind: "city",
-    affiliation: "visited",
+    affiliation: "born",
   },
 ];

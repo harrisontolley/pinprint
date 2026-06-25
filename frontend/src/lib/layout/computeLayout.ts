@@ -34,10 +34,36 @@ function placeLabel(l: LaidOut, cfg: LayoutConfig, size: LabelSize): void {
     l.dir.x > 0.15 ? "start" : l.dir.x < -0.15 ? "end" : "middle";
 
   const { w, h } = size;
-  const x = anchor === "start" ? anchorX : anchor === "end" ? anchorX - w : anchorX - w / 2;
-  const y = anchorY - h / 2;
+  const rawX = anchor === "start" ? anchorX : anchor === "end" ? anchorX - w : anchorX - w / 2;
+  const rawY = anchorY - h / 2;
 
-  l.labelBox = { x, y, w, h, anchor, anchorX, anchorY };
+  // Keep the whole label box inside the poster margins so long place names
+  // (e.g. "Los Angeles") never run off the page edge. `maxRadius` only bounds
+  // the arrow *tip*; the label text overhangs it by `labelGap + textWidth`, so
+  // a horizontal label near an edge can still spill over without this clamp.
+  // Collisions separate along the perpendicular (the relaxation step), so
+  // pinning a box to the margin doesn't block overlap resolution.
+  const x = clamp(rawX, cfg.margin, cfg.width - cfg.margin - w);
+  const y = clamp(rawY, cfg.margin, cfg.height - cfg.margin - h);
+
+  // Slide the leader-line attach point by the same amount so leaders still meet
+  // the (possibly clamped) label box.
+  l.labelBox = {
+    x,
+    y,
+    w,
+    h,
+    anchor,
+    anchorX: anchorX + (x - rawX),
+    anchorY: anchorY + (y - rawY),
+  };
+}
+
+/** Clamp `v` into [min, max]; if the range is inverted (box wider/taller than
+ * the safe area) fall back to the lower bound so the label hugs the margin. */
+function clamp(v: number, min: number, max: number): number {
+  if (max < min) return min;
+  return Math.min(Math.max(v, min), max);
 }
 
 function labelCenter(l: LaidOut): { x: number; y: number } {
