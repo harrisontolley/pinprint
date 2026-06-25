@@ -96,6 +96,28 @@ describe("computeLayout", () => {
     assertNoOverlaps(out, cfg.boxPadding);
   });
 
+  it("keeps every label box inside the poster margins (no off-page text)", () => {
+    const cfg = defaultLayoutConfig(1000, 1500);
+    // A very wide label (e.g. "Los Angeles") pointing due west would, without
+    // clamping, overhang the left edge because maxRadius only bounds the tip.
+    const wide: MeasureFn = () => ({ w: 340, h: 60 });
+    const items = Array.from({ length: 8 }, (_, i) =>
+      comp({ id: String(i), bearingDeg: i * 45, distanceKm: 1000 }),
+    );
+    const out = computeLayout(items, cfg, wide);
+    for (const o of out) {
+      const b = o.labelBox;
+      expect(b.x, `${o.id} left edge`).toBeGreaterThanOrEqual(cfg.margin - 1e-6);
+      expect(b.x + b.w, `${o.id} right edge`).toBeLessThanOrEqual(
+        cfg.width - cfg.margin + 1e-6,
+      );
+      expect(b.y, `${o.id} top edge`).toBeGreaterThanOrEqual(cfg.margin - 1e-6);
+      expect(b.y + b.h, `${o.id} bottom edge`).toBeLessThanOrEqual(
+        cfg.height - cfg.margin + 1e-6,
+      );
+    }
+  });
+
   it("returns one placement per input", () => {
     const cfg = defaultLayoutConfig(1000, 1500);
     const items = [comp({ id: "a", bearingDeg: 30 }), comp({ id: "b", bearingDeg: 210 })];
