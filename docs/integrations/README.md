@@ -8,6 +8,7 @@ the exact command to verify your change.
 | Service | What it does | Doc | Server code | Client code |
 | --- | --- | --- | --- | --- |
 | **Neon** | Postgres database | [neon.md](./neon.md) | `backend/src/db.ts` | — |
+| **Neon Auth** | Accounts, sessions, Google sign-in | [neon-auth.md](./neon-auth.md) | `backend/src/auth.ts` | `frontend/src/lib/auth/*` |
 | **Stripe** | Payments | [stripe.md](./stripe.md) | `backend/src/stripe.ts` | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (Stripe.js, later) |
 | **Prodigi** | Print-on-demand fulfilment | [prodigi.md](./prodigi.md) · [API ref](./prodigi/) | `backend/src/prodigi.ts` | — |
 | **PostHog** | Analytics, replay, flags, errors | [posthog.md](./posthog.md) | optional | `frontend/src/app/providers.tsx` |

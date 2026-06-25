@@ -10,3 +10,28 @@ export type GeoResult = {
   lng: number;
   kind?: string;
 };
+
+// Account system contracts (auth, orders, rewards, public tracking).
+export type {
+  OrderStatus,
+  EventSource,
+  OrderItem,
+  OrderEvent,
+  OrderTracking,
+  OrderSummary,
+  Order,
+  OrderShippingAddress,
+} from "./orders.js";
+export type {
+  AccountUnits,
+  Address,
+  AddressInput,
+  AccountProfile,
+  AccountProfilePatch,
+} from "./account.js";
+export type { RewardKind, RewardEvent, Rewards } from "./rewards.js";
+export type {
+  TrackRequest,
+  TrackTimelineEntry,
+  TrackResult,
+} from "./track.js";

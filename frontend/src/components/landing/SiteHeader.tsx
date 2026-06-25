@@ -1,4 +1,5 @@
 import { LinkButton } from "./LinkButton";
+import { AccountNav } from "@/components/account/AccountNav";
 import { copy, STUDIO_HREF } from "./copy";
 
 /**
@@ -29,9 +30,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <LinkButton href={STUDIO_HREF} variant="primary" size="md">
-          {copy.hero.primaryCta}
-        </LinkButton>
+        <div className="flex items-center gap-4">
+          <AccountNav />
+          <LinkButton href={STUDIO_HREF} variant="primary" size="md">
+            {copy.hero.primaryCta}
+          </LinkButton>
+        </div>
       </div>
     </header>
   );

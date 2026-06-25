@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* Neon Auth UI — theme-token mode (inherits our @theme --color-* vars below, so
+   AuthView/UserButton match the editorial palette). Import exactly once. */
+@import "@neondatabase/auth/ui/tailwind";
 
 /* ── Editorial design tokens (DESIGN.md) ──────────────────────────────────────
    Static values live in a plain `@theme` block so Tailwind emits BOTH the utility

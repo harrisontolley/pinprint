@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { GradientOrbs } from "@/components/ui/GradientOrbs";
 import { Button } from "@/components/ui/Button";
+import { AccountNav } from "@/components/account/AccountNav";
 
 /**
  * The studio's top bar: wordmark + tagline, with export demoted to outline
@@ -57,6 +58,7 @@ export function StudioHeader({
           >
             {exporting === "png" ? "Rendering…" : "Download PNG"}
           </Button>
+          <AccountNav />
         </div>
       </div>
     </header>
