@@ -34,11 +34,10 @@ export const copy = {
     primaryCta: PRIMARY_CTA,
     secondaryCta: "See how it works",
     media: {
-      label: "Hero — a finished poster: home in the center, labeled arrows fanning out to each place with distances",
-      caption: "Replace with a high-res render of a real poster (vintage-cartography style).",
-      aspect: "2 / 3",
-      src: "/showcase/hero-home-london.png",
-      alt: "Vintage cartography poster with arrows pointing from London to New York, Paris, Edinburgh, Sydney and Lisbon",
+      label: "Hero — a finished Pinprint poster, framed and hung above a reading chair",
+      aspect: "16 / 9",
+      src: "/showcase/poster_on_wall.png",
+      alt: "Framed minimal compass poster centered on Brighton, hung on a wall above a green armchair",
     },
   },
 
@@ -177,8 +176,8 @@ export const copy = {
       {
         label: "Example poster — three continents",
         aspect: "2 / 3",
-        src: "/showcase/showcase-three-continents.png",
-        alt: "Constellation poster spanning three continents, centered on Singapore",
+        src: "/showcase/lady_holding_poster.png",
+        alt: "A person holding a framed night-sky poster centered on Singapore, spanning three continents",
       },
       {
         label: "Example poster — one long road trip",
