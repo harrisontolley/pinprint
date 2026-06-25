@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { GradientOrbs } from "@/components/ui/GradientOrbs";
 import { Button } from "@/components/ui/Button";
 
@@ -26,7 +27,13 @@ export function StudioHeader({
       <GradientOrbs preset="header" />
       <div className="relative z-10 flex items-center justify-between gap-4 px-5 py-3">
         <div className="flex items-baseline gap-3">
-          <h1 className="font-display text-2xl leading-none text-ink">Pinprint</h1>
+          <Link
+            href="/"
+            title="Back to home"
+            className="rounded-sm transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <h1 className="font-display text-2xl leading-none text-ink">Pinprint</h1>
+          </Link>
           <span className="hidden text-sm text-muted sm:inline">
             poster maps of the places that matter
           </span>

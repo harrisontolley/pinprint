@@ -9,7 +9,7 @@ export function Hero() {
   const { hero } = copy;
   return (
     <Section orbs="preview" className="pt-32 md:pt-40">
-      <div id="top" className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+      <div id="top" className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col items-start gap-6">
           <SectionLabel>{hero.eyebrow}</SectionLabel>
           <h1 className="font-display text-[clamp(2.25rem,6vw,64px)] font-normal leading-[1.05] tracking-[-1.92px] text-ink">
@@ -32,7 +32,7 @@ export function Hero() {
           <PosterImage
             media={hero.media}
             priority
-            sizes="(min-width: 1024px) 45vw, 100vw"
+            sizes="(min-width: 1024px) 55vw, 100vw"
             className="shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
           />
         </div>
