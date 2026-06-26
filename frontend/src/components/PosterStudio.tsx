@@ -24,7 +24,8 @@ import { BuyBar } from "@/components/studio/BuyBar";
  * bar. The rail and stage own their internals; this component only resolves the
  * active template/size, derives the measured geometry, and wires export + the
  * ?template/?variant deep links. Desktop is a fixed two-pane viewport; mobile
- * stacks (poster first) and scrolls the page under a sticky buy bar.
+ * dissolves the rail into one scrolling column (Design → Places → preview →
+ * Advanced → Size) under a sticky buy bar, reordered via flex `order`.
  */
 export function PosterStudio() {
   const home = usePosterStore((s) => s.home);
@@ -109,9 +110,9 @@ export function PosterStudio() {
       />
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <ConfigRail className="order-2 lg:order-1 lg:overflow-y-auto" />
+        <ConfigRail className="lg:order-1 lg:overflow-y-auto" />
         <PosterStage
-          className="order-1 min-h-[55vh] lg:order-2 lg:min-h-0 lg:overflow-auto"
+          className="order-3 min-h-[55vh] lg:order-2 lg:min-h-0 lg:overflow-auto"
           home={home}
           items={items}
           template={template}

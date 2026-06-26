@@ -11,9 +11,14 @@ export function AccountNav() {
   return (
     <div className="flex items-center">
       <SignedOut>
-        <LinkButton href="/auth/sign-in" variant="outline" size="sm">
-          Sign in
-        </LinkButton>
+        {/* On mobile, "Sign in" lives inside the hamburger menu so the primary
+            CTA stands alone; shown inline only from md: up. Wrapped so the
+            display toggle doesn't fight LinkButton's own inline-flex. */}
+        <span className="hidden md:inline-flex">
+          <LinkButton href="/auth/sign-in" variant="outline" size="sm">
+            Sign in
+          </LinkButton>
+        </span>
       </SignedOut>
       <SignedIn>
         <AccountMenu />

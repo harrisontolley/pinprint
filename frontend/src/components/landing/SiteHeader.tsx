@@ -1,4 +1,5 @@
 import { LinkButton } from "./LinkButton";
+import { MobileNav } from "./MobileNav";
 import { AccountNav } from "@/components/account/AccountNav";
 import { copy, STUDIO_HREF } from "./copy";
 
@@ -30,11 +31,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           <AccountNav />
           <LinkButton href={STUDIO_HREF} variant="primary" size="md">
             {copy.hero.primaryCta}
           </LinkButton>
+          <MobileNav />
         </div>
       </div>
     </header>

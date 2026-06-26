@@ -49,14 +49,23 @@ export function ConfigRail({ className = "" }: { className?: string }) {
 
   return (
     <aside
-      className={`flex w-full shrink-0 flex-col border-hairline bg-canvas-soft lg:w-[380px] lg:border-r ${className}`}
+      className={`contents lg:flex lg:w-[380px] lg:shrink-0 lg:flex-col lg:border-r lg:border-hairline lg:bg-canvas-soft ${className}`}
     >
-      <div className="flex flex-col px-4 pb-6">
-        <DisclosureSection title="Design" accessory={lookLabel} defaultOpen>
+      <div className="contents lg:flex lg:flex-col lg:px-4 lg:pb-6">
+        <DisclosureSection
+          title="Design"
+          accessory={lookLabel}
+          defaultOpen
+          className="order-1 px-4 lg:order-none lg:px-0"
+        >
           <LookGrid />
         </DisclosureSection>
 
-        <DisclosureSection title="Places" defaultOpen>
+        <DisclosureSection
+          title="Places"
+          defaultOpen
+          className="order-2 px-4 lg:order-none lg:px-0"
+        >
           <div className="flex flex-col gap-4">
             <div>
               <PlaceSearch onSelect={handleSelect} />
@@ -76,11 +85,19 @@ export function ConfigRail({ className = "" }: { className?: string }) {
           </div>
         </DisclosureSection>
 
-        <DisclosureSection title="Size" accessory={product.label} defaultOpen>
+        <DisclosureSection
+          title="Size"
+          accessory={product.label}
+          defaultOpen
+          className="order-5 px-4 lg:order-none lg:px-0"
+        >
           <SizePicker />
         </DisclosureSection>
 
-        <DisclosureSection title="Advanced">
+        <DisclosureSection
+          title="Advanced"
+          className="order-4 px-4 lg:order-none lg:px-0"
+        >
           <AdvancedPanel />
         </DisclosureSection>
       </div>

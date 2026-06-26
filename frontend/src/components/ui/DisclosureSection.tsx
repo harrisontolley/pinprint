@@ -10,16 +10,22 @@ export function DisclosureSection({
   title,
   accessory,
   defaultOpen = false,
+  className = "",
   children,
 }: {
   title: string;
   /** Small muted status shown at the right of the summary (e.g. "Heirloom"). */
   accessory?: ReactNode;
   defaultOpen?: boolean;
+  /** Extra classes on the root <details> (e.g. flex order for mobile). */
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <details className="group border-b border-hairline" open={defaultOpen}>
+    <details
+      className={`group border-b border-hairline ${className}`}
+      open={defaultOpen}
+    >
       <summary className="flex cursor-pointer list-none select-none items-center justify-between gap-3 py-3.5 [&::-webkit-details-marker]:hidden">
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
           {title}
