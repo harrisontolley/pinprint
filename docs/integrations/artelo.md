@@ -12,7 +12,11 @@ which prints the poster and ships it. No SDK — plain `fetch` against their RES
 | `ARTELO_API_BASE` | backend | `https://www.artelo.io/api/open`. No separate sandbox host. |
 | `ARTELO_WEBHOOK_SECRET` | backend | HMAC secret returned by `POST /webhooks/save` when you register the webhook. Verifies `x-artelo-signature` on callbacks. |
 | `ARTELO_TEST_ORDERS` | backend | When **not** exactly `"false"`, orders submit with `isTestOrder=true` (Artelo marks them `Ignored`: never produced, never charged). Set `false` to go live. **Defaults to test.** |
-| `BLOB_READ_WRITE_TOKEN` | backend | Vercel Blob token — stores the print-ready PNG the browser uploads. |
+| `BLOB_READ_WRITE_TOKEN` | backend | Vercel Blob token — stores the print-ready PNG the browser uploads (as a **private** blob) and signs the short-lived Artelo-fetch URL. |
+| `BLOB_SIGNED_URL_TTL_DAYS` | backend | Optional. TTL of the signed GET URL handed to Artelo. Default `30`. Must outlive Artelo's fetch (see gotchas). |
+| `CRON_SECRET` | backend | Bearer secret for the daily blob-GC cron (`/jobs/blob-gc`). Vercel injects it on cron requests; the route 503s when unset. |
+| `BLOB_ORPHAN_TTL_HOURS` | backend | Optional. Age after which an *unreferenced* uploaded blob is GC'd. Default `48`. |
+| `BLOB_RETENTION_DAYS` | backend | Optional. Age (from order creation) after which artwork for a **terminal** order is GC'd. Default `90`. |
 
 No sandbox/live split of base URL or key — the single account toggles real vs test
 fulfilment per-order via `isTestOrder`. Rate limit: 50 requests / 10s → `429`.
@@ -35,6 +39,10 @@ fulfilment per-order via `isTestOrder`. Rate limit: 50 requests / 10s → `429`.
 - `backend/src/routes/admin.ts` — operator endpoints that drive the above (cancel / sync /
   retry-fulfilment); see `docs/admin.md`.
 - `backend/src/routes/dev.ts` — `POST /dev/artelo/register-webhook` (one-time, DEV_SEED_TOKEN-guarded).
+- `backend/src/blob.ts` — env-guarded Blob helpers: `signAssetUrl()` (private blob → short-lived signed
+  GET URL for Artelo), `listPosterBlobs()` / `deletePosterBlobs()` for GC.
+- `backend/src/blobGc.ts` + `backend/src/routes/jobs.ts` — the lifecycle GC (`selectBlobsToDelete()` is the
+  pure, tested decision) and the `CRON_SECRET`-guarded `GET|POST /jobs/blob-gc` route (Vercel cron in `vercel.json`).
 - `packages/shared/src/commerce.ts` — `ARTELO_PRODUCT_BY_ID` + `arteloProductInfoFor()`:
   our `productId` → Artelo `productInfo` (catalog product, paper, frame, size, orientation).
 - Frontend: `lib/export/exportPngBlob` (rasterize) + `lib/upload/uploadPosterPng` (Blob upload),
@@ -104,8 +112,14 @@ To retune paper/frame, edit `ARTELO_PRODUCT_BY_ID` in `packages/shared/src/comme
 
 - **`createdAt` is required** on `/orders/create` (ISO string). Easy to miss.
 - **`frameColor` + `frameStyle` are always required**, including unframed (`"Unframed"`).
-- The print **asset must be a publicly reachable URL** at submit time — Artelo fetches it.
-  We pass the Vercel Blob URL as `designs[].sourceImage.url` (no separate upload/poll needed).
+- The print **asset must be a reachable URL** at submit time — Artelo fetches it. The PNG is a
+  **private** Vercel Blob (it encodes the buyer's personal locations, so it must not be world-readable),
+  so we mint a short-lived **signed** GET URL per asset at submit time (`signAssetUrl` in `backend/src/blob.ts`)
+  and pass it as `designs[].sourceImage.url` (no separate upload/poll needed). Reprints re-sign from the
+  retained blob. Legacy public blobs pass through unsigned, so in-flight orders keep working.
+  - **Signed-URL TTL vs Artelo's fetch.** If Artelo lazily re-fetches the asset at production (not just at
+    create), the signed URL must still be valid then — keep `BLOB_SIGNED_URL_TTL_DAYS` generous (default 30)
+    and re-confirm Artelo's ingestion timing if shortening it.
 - Webhook signature is `HMAC-SHA256(JSON.stringify(parsedBody), ARTELO_WEBHOOK_SECRET)` hex — Artelo
   re-stringifies the parsed body, so we verify against `JSON.stringify(JSON.parse(raw))`, not raw bytes.
 - Webhook must respond < 10s; failed deliveries retry up to 20× then the webhook is auto-deleted.
@@ -122,6 +136,10 @@ To retune paper/frame, edit `ARTELO_PRODUCT_BY_ID` in `packages/shared/src/comme
 - **No Blob store = no physical orders.** The print asset is uploaded to Vercel Blob; if
   `BLOB_READ_WRITE_TOKEN` / a Blob store isn't configured, `POST /uploads/token` 503s and physical
   checkout can't complete. Provision a Blob store and set the token before going live.
+- **Artwork lifecycle (cost + privacy).** A daily cron (`/jobs/blob-gc`, `CRON_SECRET`-guarded; see
+  `backend/src/blobGc.ts`) deletes orphaned uploads (never tied to an order, older than
+  `BLOB_ORPHAN_TTL_HOURS`) and artwork for terminal orders past `BLOB_RETENTION_DAYS`. Without it, every
+  preview ever uploaded — most never bought — lives forever. Dry-run: `POST /jobs/blob-gc?dryRun=1`.
 
 ## Verify
 
