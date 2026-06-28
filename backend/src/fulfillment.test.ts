@@ -87,6 +87,13 @@ describe("buildCreateOrderBody", () => {
     });
   });
 
+  it("resolves each design URL through resolveAssetUrl (signed at submit time)", () => {
+    const body = buildCreateOrderBody(order(), true, (u) => `${u}?sig=abc`);
+    expect(body.items[0].productInfo.designs[0].sourceImage.url).toBe(
+      "https://blob.example/poster.png?sig=abc",
+    );
+  });
+
   it("drops digital items and print items missing an asset URL", () => {
     const o = order({
       items: [

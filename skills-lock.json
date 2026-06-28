@@ -37,6 +37,12 @@
       "skillPath": "skills/redis-core/SKILL.md",
       "computedHash": "5b342de2555699d1785335711883711ff6ef7e213a1ea57d6bf693184a5c8683"
     },
+    "security-review": {
+      "source": "getsentry/skills",
+      "sourceType": "github",
+      "skillPath": "skills/security-review/SKILL.md",
+      "computedHash": "ec9792f5fd065e020c48ab5a57707c83435c286c449ba98dfa726d7b1842c868"
+    },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",

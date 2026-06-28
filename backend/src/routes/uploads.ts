@@ -8,6 +8,11 @@ import { enforce } from "../rateLimit.js";
 // through this function's request-body limit). This route only mints/validates
 // the short-lived client token — it touches Blob via BLOB_READ_WRITE_TOKEN.
 //
+// The client uploads with access:'private' (a poster encodes personal locations),
+// so the blob is not world-readable. The access level rides on the client's
+// upload() call, not the minted token, so nothing changes here for that — we hand
+// Artelo a short-lived signed URL at submit time (see backend/src/blob.ts).
+//
 // Env-guarded like the rest of the integrations: 503 when BLOB_READ_WRITE_TOKEN
 // is unset, so the app still builds/runs without blob storage configured.
 //
@@ -60,7 +65,7 @@ export function buildUploadsRouter(): Hono<{ Variables: AuthVariables }> {
           };
         },
         // Fires server-to-server after the upload completes. No-op: the browser
-        // already has the public URL and forwards it through checkout. (In local
+        // already has the blob URL and forwards it through checkout. (In local
         // dev Vercel can't reach localhost, so this simply won't fire.)
         onUploadCompleted: async () => {},
       });

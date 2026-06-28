@@ -1,5 +1,6 @@
 import { arteloProductInfoFor } from "@pinprint/shared";
 import { arteloFetch, getArteloConfig } from "./artelo.js";
+import { signAssetUrl } from "./blob.js";
 import {
   appendOrderEvent,
   getOrderForFulfillment,
@@ -30,8 +31,17 @@ function taxCentsFromDetails(details: Record<string, unknown> | undefined): numb
   return parts.length ? parts.reduce((a, b) => a + b, 0) : null;
 }
 
-/** Build the Artelo create-order request body from a paid order. Exported for tests. */
-export function buildCreateOrderBody(order: FulfillmentOrder, isTestOrder: boolean) {
+/**
+ * Build the Artelo create-order request body from a paid order. Pure + sync so it
+ * unit-tests without network. Posters are private blobs, so the URL we expose to
+ * Artelo is resolved through `resolveAssetUrl` — the caller signs each asset (see
+ * submitOrderToArtelo) and passes a lookup; it defaults to identity. Exported for tests.
+ */
+export function buildCreateOrderBody(
+  order: FulfillmentOrder,
+  isTestOrder: boolean,
+  resolveAssetUrl: (assetUrl: string) => string = (u) => u,
+) {
   const s = order.shipping;
   const customerAddress = {
     name: s.name ?? undefined,
@@ -59,7 +69,7 @@ export function buildCreateOrderBody(order: FulfillmentOrder, isTestOrder: boole
         unitPrice: (it.unitPriceCents ?? 0) / 100,
         productInfo: {
           ...productInfo,
-          designs: [{ sourceImage: { url: it.assetUrl }, fitOptions: {} }],
+          designs: [{ sourceImage: { url: resolveAssetUrl(it.assetUrl) }, fitOptions: {} }],
         },
       };
     })
@@ -185,7 +195,11 @@ export async function submitOrderToArtelo(orderId: string): Promise<SubmitResult
   if (!order) return { submitted: false, reason: "order_not_found" };
   if (order.arteloOrderId) return { submitted: false, reason: "already_submitted" };
 
-  const body = buildCreateOrderBody(order, cfg.testOrders);
+  // Posters are private blobs — mint a short-lived signed GET URL per distinct
+  // asset so Artelo can fetch it (legacy public blobs pass through unchanged).
+  const assetUrls = [...new Set(order.items.map((it) => it.assetUrl).filter((u): u is string => !!u))];
+  const signed = new Map(await Promise.all(assetUrls.map(async (u) => [u, await signAssetUrl(u)] as const)));
+  const body = buildCreateOrderBody(order, cfg.testOrders, (u) => signed.get(u) ?? u);
   if (body.items.length === 0) {
     return { submitted: false, reason: "no_printable_items" };
   }
