@@ -8,7 +8,7 @@ import type { MiddlewareHandler } from "hono";
 // does same-origin in production. Env-guarded: with NEON_AUTH_JWKS_URL unset the
 // middleware fails clean (401), so routes still register and tests stay hermetic.
 
-export type AuthUser = { userId: string; email?: string };
+export type AuthUser = { userId: string; email?: string; emailVerified?: boolean };
 export type AuthVariables = { user: AuthUser | null };
 
 type KeyResolver = ReturnType<typeof createRemoteJWKSet>;
@@ -41,7 +41,11 @@ async function verifyToken(token: string): Promise<AuthUser | null> {
     const userId = typeof payload.sub === "string" ? payload.sub : "";
     if (!userId) return null;
     const email = typeof payload.email === "string" ? payload.email : undefined;
-    return { userId, email };
+    // Better Auth / Neon Auth may emit either casing; treat a missing claim as
+    // unknown (undefined), an explicit false as unverified (blocks admin).
+    const ev = payload.email_verified ?? (payload as Record<string, unknown>).emailVerified;
+    const emailVerified = typeof ev === "boolean" ? ev : undefined;
+    return { userId, email, emailVerified };
   } catch {
     return null;
   }
@@ -84,9 +88,16 @@ export function isAdminConfigured(): boolean {
   return adminEmails().size > 0;
 }
 
-/** Whether a verified user's email is on the admin allowlist. */
+/**
+ * Whether a user's email is on the admin allowlist. Requires the email to not be
+ * explicitly unverified — so an attacker can't escalate by setting their account
+ * email to a known admin address without proving ownership. (A missing
+ * `email_verified` claim is treated as unknown and allowed; ensure Neon Auth
+ * requires re-verification on email change — see docs/admin.md.)
+ */
 export function isAdminUser(user: AuthUser | null): boolean {
   if (!user?.email) return false;
+  if (user.emailVerified === false) return false;
   return adminEmails().has(user.email.toLowerCase());
 }
 

@@ -35,11 +35,15 @@ export function rateLimit(
   return b.count > opts.max;
 }
 
-/** Best-effort client identity from proxy headers (mirrors the /track limiter). */
+/**
+ * Best-effort client identity from proxy headers. Prefer `x-real-ip` (set by the
+ * Vercel edge, not client-overridable) over the leftmost `x-forwarded-for` (which
+ * a client can spoof to mint a fresh bucket per request and evade the limit).
+ */
 export function clientKey(c: { req: { header: (k: string) => string | undefined } }): string {
   return (
-    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
     c.req.header("x-real-ip") ||
+    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
     "unknown"
   );
 }

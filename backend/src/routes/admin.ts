@@ -107,7 +107,12 @@ export function buildAdminRouter(): Hono<{ Variables: AuthVariables }> {
     if (!info.paymentIntentId) return c.json({ error: "no_payment_intent" }, 400);
 
     const remaining = info.totalCents - info.amountRefundedCents;
-    const amountCents = body.amountCents && body.amountCents > 0 ? Math.floor(body.amountCents) : undefined;
+    // Reject a non-positive partial amount explicitly (a fat-fingered negative
+    // must not silently fall through to a full refund).
+    if (body.amountCents !== undefined && !(body.amountCents > 0)) {
+      return c.json({ error: "invalid_amount" }, 400);
+    }
+    const amountCents = body.amountCents ? Math.floor(body.amountCents) : undefined;
     if (amountCents !== undefined && amountCents > remaining) {
       return c.json({ error: "amount_exceeds_remaining", remaining }, 400);
     }

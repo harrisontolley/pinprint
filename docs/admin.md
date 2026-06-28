@@ -18,6 +18,10 @@ allowlist. There is no separate admin login.
   server enforces every route, so a non-admin can't reach the data even by typing the URL.
 - `GET /health/integrations` reports `admin: true|false` (whether an allowlist is configured).
 - Add yourself: set `ADMIN_EMAILS=you@example.com` in Vercel (backend) and locally in `backend/.env`.
+- **Security note:** admin is the email claim on a *signature-verified* JWT, and an explicitly
+  unverified email (`email_verified:false`) is rejected. The allowlist is only as strong as your
+  identity provider — ensure Neon Auth requires **re-verification when a user changes their email**,
+  so a known admin address can't be claimed without proving ownership.
 
 ## Dashboard
 
