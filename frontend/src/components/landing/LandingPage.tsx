@@ -4,6 +4,7 @@ import { SocialProofBar } from "./SocialProofBar";
 import { Problem } from "./Problem";
 import { Features } from "./Features";
 import { HowItWorks } from "./HowItWorks";
+import { GlobeDemo } from "./GlobeDemo";
 import { Showcase } from "./Showcase";
 import { Testimonials } from "./Testimonials";
 import { Pricing } from "./Pricing";
@@ -25,6 +26,7 @@ export function LandingPage() {
       <Problem />
       <Features />
       <HowItWorks />
+      <GlobeDemo />
       <Showcase />
       <Testimonials />
       <Pricing />

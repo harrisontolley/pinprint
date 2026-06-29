@@ -152,6 +152,12 @@ export const copy = {
     ],
   },
 
+  globe: {
+    eyebrow: "Drawn true",
+    headline: "Real bearings, not decoration.",
+    body: "Here's New York and five places it's tied to. Each arc follows the great-circle path — the real shortest line across the globe — and the same maths draws every arrow on your poster.",
+  },
+
   showcase: {
     eyebrow: "Made with Pinprint",
     headline: "A few we'd hang ourselves.",
