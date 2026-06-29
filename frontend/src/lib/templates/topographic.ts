@@ -1,21 +1,22 @@
 import type { TemplateSpec } from "./types";
 
 /**
- * Topographic — an outdoors contour map. Warm sand paper with layered contour
- * rings radiating from home as distance bands, mossy ink, clay accents and a
- * subtle grain. Affiliation color is earthy and tints the arrows.
+ * Topographic — a contour-relief field map. Warm sand paper with layered
+ * umber contour rings radiating from home as elevation bands, deep umber ink,
+ * burnt-sienna accents and a subtle grain. Clean Inter labels sit over the
+ * relief; affiliation color is earthy and tints the arrows.
  */
 export const topographic: TemplateSpec = {
   id: "topographic",
   name: "Topographic",
-  blurb: "Contour rings, earthy tones, field-map feel.",
+  blurb: "Umber contour relief, earthy bands, bold labels.",
 
-  paper: "#ece4d2",
-  paperEdge: "#d8cab0",
-  ink: "#3b4a2f",
-  inkSoft: "#6f7a55",
+  paper: "#e9e0cd",
+  paperEdge: "#d3c4a6",
+  ink: "#43382a",
+  inkSoft: "#8a7a5f",
   accent: "#b5622e",
-  border: "#7a7351",
+  border: "#8a7a5f",
 
   rose: "none",
   texture: true,
@@ -49,9 +50,9 @@ export const topographic: TemplateSpec = {
 
   affiliationColors: {
     born: "#b5622e",
-    lived: "#5c7a3a",
+    lived: "#6f7a3f",
     visited: "#3f6f72",
-    family: "#8a3b2e",
+    family: "#8a4a2e",
   },
   colorizeArrows: true,
   glyphOpacity: 1,

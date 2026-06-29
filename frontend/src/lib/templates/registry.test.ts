@@ -32,9 +32,16 @@ describe("template registry", () => {
     }
   });
 
-  it("includes the four new designs", () => {
-    for (const id of ["blueprint", "art-deco", "topographic", "constellation"] as const) {
+  it("includes the four trend designs, leading the order", () => {
+    const trend = [
+      "warm-minimal",
+      "mid-century",
+      "swiss-editorial",
+      "celestial",
+    ] as const;
+    for (const id of trend) {
       expect(TEMPLATE_ORDER).toContain(id);
     }
+    expect(TEMPLATE_ORDER.slice(0, 4)).toEqual(trend);
   });
 });

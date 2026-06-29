@@ -1,21 +1,22 @@
 import type { TemplateSpec } from "./types";
 
 /**
- * Night sky — dark navy field, faint concentric rings, a glowing center point,
- * thin light arrows, off-white serif names with gold accents. The gift /
- * emotional positioning; affiliation shows as luminous gold-family tints.
+ * Night sky — a cool observatory starfield. Deep cool navy, radiating starburst,
+ * faint dotted rings, a soft glow at center, thin steel-blue arrows and cool
+ * starlight serif names. Cooler than the warm-gold Celestial; no constellation
+ * lines (that stays Constellation's identity).
  */
 export const nightSky: TemplateSpec = {
   id: "night-sky",
   name: "Night Sky",
-  blurb: "Navy field, glowing center, golden labels.",
+  blurb: "Cool navy starfield, dotted rings, silver labels.",
 
-  paper: "#0b1026",
-  paperEdge: "#05070f",
-  ink: "#ede8d6",
-  inkSoft: "#a9a07f",
-  accent: "#e8c66b",
-  border: "#2a3050",
+  paper: "#0a1228",
+  paperEdge: "#050a18",
+  ink: "#e9edf5",
+  inkSoft: "#8e9bbf",
+  accent: "#8fb8dd",
+  border: "#283050",
 
   rose: "starburst",
   texture: false,
@@ -47,10 +48,10 @@ export const nightSky: TemplateSpec = {
   iconSize: 25,
 
   affiliationColors: {
-    born: "#e8c66b",
-    lived: "#8fc0a0",
-    visited: "#8fb3d9",
-    family: "#d9919e",
+    born: "#cfe0f2",
+    lived: "#9ec8b8",
+    visited: "#a8c4ee",
+    family: "#e0a9b8",
   },
   colorizeArrows: false,
   glyphOpacity: 0.95,

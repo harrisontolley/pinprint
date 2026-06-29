@@ -4,6 +4,8 @@ import {
   EB_Garamond,
   Archivo,
   JetBrains_Mono,
+  Fraunces,
+  Space_Grotesk,
 } from "next/font/google";
 
 // Shared font instances. Each exposes a CSS variable applied on <html> so both
@@ -46,4 +48,20 @@ export const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const fontVariables = `${inter.variable} ${playfair.variable} ${garamond.variable} ${archivo.variable} ${jetbrainsMono.variable}`;
+// Warm "old-style" optical serif for the trend looks (warm-minimal, mid-century,
+// celestial titles).
+export const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+// Contemporary grotesque for Swiss Editorial (all type) and mid-century labels.
+export const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+export const fontVariables = `${inter.variable} ${playfair.variable} ${garamond.variable} ${archivo.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable}`;

@@ -1,20 +1,21 @@
 import type { TemplateSpec } from "./types";
 
 /**
- * Blueprint — an architect's drafting drawing. Deep blueprint-blue field, a fine
- * cyan grid, hairline arrows, a technical crosshair compass, and monospaced
- * labels. Monochrome by intent; affiliation shows only as subtle cyan tints.
+ * Blueprint — a cyanotype technical drawing. Deep Prussian-blue field, a fine
+ * cyan drafting grid, hairline arrows, a technical crosshair compass, and
+ * monospaced typography throughout (title included). Two-colour by intent;
+ * affiliation shows only as a near-monochrome cyan family.
  */
 export const blueprint: TemplateSpec = {
   id: "blueprint",
   name: "Blueprint",
-  blurb: "Drafting grid, hairlines, mono labels.",
+  blurb: "Cyanotype blue, drafting grid, mono labels.",
 
-  paper: "#0e3a5f",
-  paperEdge: "#0b2f4d",
-  ink: "#dbe9f5",
-  inkSoft: "#7fa8c9",
-  accent: "#9fd0ff",
+  paper: "#0a3d62",
+  paperEdge: "#082f4d",
+  ink: "#e8f1fb",
+  inkSoft: "#84accb",
+  accent: "#8fc7f5",
   border: "#6f9fc4",
 
   rose: "crosshair",
@@ -24,35 +25,35 @@ export const blueprint: TemplateSpec = {
   homeGlow: false,
   backdrop: "grid",
 
-  titleFamily: "var(--font-archivo)",
+  titleFamily: "var(--font-jetbrains-mono)",
   nameFamily: "var(--font-jetbrains-mono)",
   distFamily: "var(--font-jetbrains-mono)",
 
   titleWeight: 700,
-  titleLetterSpacing: 4,
+  titleLetterSpacing: 5,
   nameTransform: "uppercase",
   nameWeight: 500,
   nameLetterSpacing: 1,
   distItalic: false,
   distLetterSpacing: 0.5,
 
-  titleSize: 70,
-  subtitleSize: 20,
+  titleSize: 58,
+  subtitleSize: 19,
   nameSize: 22,
   distSize: 16,
   lineHeight: 28,
-  arrowWidth: 1.4,
+  arrowWidth: 1.2,
   arrowhead: "line",
-  arrowheadSize: 14,
+  arrowheadSize: 13,
   homeDotSize: 8,
   iconSize: 20,
 
   affiliationColors: {
-    born: "#9fd0ff",
-    lived: "#8fe0c0",
-    visited: "#cfe6ff",
-    family: "#ffd6a0",
+    born: "#bfe0ff",
+    lived: "#9fd0ff",
+    visited: "#d6ebff",
+    family: "#7fb8e6",
   },
   colorizeArrows: false,
-  glyphOpacity: 0.9,
+  glyphOpacity: 0.85,
 };

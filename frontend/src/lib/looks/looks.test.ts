@@ -8,10 +8,16 @@ import {
 } from "./looks";
 
 describe("looks registry", () => {
-  it("exposes six featured looks, in order", () => {
-    expect(LOOKS).toHaveLength(6);
-    expect(LOOK_ORDER).toHaveLength(6);
+  it("exposes the featured looks, in order, trend looks first", () => {
+    expect(LOOKS).toHaveLength(10);
+    expect(LOOK_ORDER).toHaveLength(10);
     expect(LOOK_ORDER).toEqual(LOOKS.map((l) => l.id));
+    expect(LOOK_ORDER.slice(0, 4)).toEqual([
+      "warm-minimal",
+      "mid-century",
+      "swiss",
+      "celestial",
+    ]);
   });
 
   it("indexes every look by id", () => {
@@ -20,9 +26,9 @@ describe("looks registry", () => {
     }
   });
 
-  it("defaults to a real look", () => {
+  it("defaults to the flagship warm-minimal look", () => {
     expect(LOOKS_BY_ID[DEFAULT_LOOK_ID]).toBeDefined();
-    expect(DEFAULT_LOOK_ID).toBe("heirloom");
+    expect(DEFAULT_LOOK_ID).toBe("warm-minimal");
   });
 });
 
@@ -36,6 +42,13 @@ describe("activeLookId", () => {
     expect(activeLookId("night-sky", "explorer")).toBe("nightfall");
     expect(activeLookId("topographic", "classic")).toBe("field-map");
     expect(activeLookId("minimal-compass", "classic")).toBe("minimal");
+  });
+
+  it("maps the trend templates to their looks", () => {
+    expect(activeLookId("warm-minimal", "classic")).toBe("warm-minimal");
+    expect(activeLookId("mid-century", "classic")).toBe("mid-century");
+    expect(activeLookId("swiss-editorial", "classic")).toBe("swiss");
+    expect(activeLookId("celestial", "classic")).toBe("celestial");
   });
 
   it("returns null when the selection lives only under Advanced", () => {

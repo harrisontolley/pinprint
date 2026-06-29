@@ -2,17 +2,17 @@ import type { TemplateSpec } from "./types";
 
 /**
  * HERO template — aged-paper cartography. Warm paper with a vignette + grain,
- * a decorative compass rose behind the center, serif typography (Playfair +
- * EB Garamond), small-caps place names and italic distances, a double-rule
- * border. The look the demo sells.
+ * a decorative compass rose behind the center, a faint lat/long graticule,
+ * serif typography (Playfair + EB Garamond), small-caps place names and italic
+ * distances, a double-rule border. The look the demo sells.
  */
 export const vintage: TemplateSpec = {
   id: "vintage-cartography",
   name: "Vintage Cartography",
-  blurb: "Aged paper, compass rose, engraved serif type.",
+  blurb: "Aged paper, graticule, compass rose, engraved serif.",
 
   paper: "#ede3cf",
-  paperEdge: "#cdb98f",
+  paperEdge: "#c6b083",
   ink: "#3a2d18",
   inkSoft: "#7a6543",
   accent: "#6b4f2a",
@@ -23,6 +23,7 @@ export const vintage: TemplateSpec = {
   doubleBorder: true,
   ringGuides: false,
   homeGlow: false,
+  backdrop: "grid",
 
   titleFamily: "var(--font-playfair)",
   nameFamily: "var(--font-garamond)",

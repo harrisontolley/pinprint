@@ -10,6 +10,8 @@ const FONT_VARS = [
   "--font-inter",
   "--font-archivo",
   "--font-jetbrains-mono",
+  "--font-fraunces",
+  "--font-space-grotesk",
 ];
 
 const dataUriCache = new Map<string, string | null>();

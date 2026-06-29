@@ -1,4 +1,8 @@
 import type { TemplateId, TemplateSpec, VintageVariant } from "./types";
+import { warmMinimal } from "./warmMinimal";
+import { midCentury } from "./midCentury";
+import { swissEditorial } from "./swissEditorial";
+import { celestial } from "./celestial";
 import { vintage } from "./vintage";
 import { minimal } from "./minimal";
 import { bold } from "./bold";
@@ -10,6 +14,10 @@ import { constellation } from "./constellation";
 import { VINTAGE_VARIANTS } from "./vintageVariants";
 
 export const TEMPLATES: Record<TemplateId, TemplateSpec> = {
+  "warm-minimal": warmMinimal,
+  "mid-century": midCentury,
+  "swiss-editorial": swissEditorial,
+  celestial,
   "vintage-cartography": vintage,
   "minimal-compass": minimal,
   "bold-modern": bold,
@@ -20,8 +28,12 @@ export const TEMPLATES: Record<TemplateId, TemplateSpec> = {
   constellation,
 };
 
-/** Display order in the switcher — hero first. */
+/** Display order in the switcher — trend looks first, then the originals. */
 export const TEMPLATE_ORDER: TemplateId[] = [
+  "warm-minimal",
+  "mid-century",
+  "swiss-editorial",
+  "celestial",
   "vintage-cartography",
   "minimal-compass",
   "bold-modern",
@@ -32,7 +44,7 @@ export const TEMPLATE_ORDER: TemplateId[] = [
   "constellation",
 ];
 
-export const DEFAULT_TEMPLATE_ID: TemplateId = "vintage-cartography";
+export const DEFAULT_TEMPLATE_ID: TemplateId = "warm-minimal";
 
 export function getTemplate(id: TemplateId): TemplateSpec {
   return TEMPLATES[id];

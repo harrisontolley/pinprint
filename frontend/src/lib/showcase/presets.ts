@@ -7,8 +7,12 @@ import type { TemplateId, VintageVariant } from "@/lib/templates/types";
  * These drive the dev-only `/render/[id]` route and the `render-posters` script
  * (see frontend/scripts/render-posters.ts). Coordinates are hardcoded real
  * cities so generation needs no geocoder/backend. Each preset maps to one media
- * slot in the landing copy (frontend/src/components/landing/copy.ts) and the
- * twelve together cover all eight templates.
+ * slot in the landing copy (frontend/src/components/landing/copy.ts) and together
+ * they cover a representative spread of templates (incl. the trend looks).
+ *
+ * NOTE: the committed PNGs under public/showcase are pre-rendered. After changing
+ * a preset's templateId, regenerate them with `pnpm --filter @pinprint/frontend
+ * render:posters` (on-demand; needs Playwright + a dev server).
  */
 
 export type PosterPreset = {
@@ -147,7 +151,7 @@ export const PRESETS: PosterPreset[] = [
   {
     slug: "showcase-student-years-abroad",
     slot: "showcase",
-    templateId: "blueprint",
+    templateId: "swiss-editorial",
     units: "km",
     home: home("Manchester", 53.4808, -2.2426),
     places: [
@@ -173,7 +177,7 @@ export const PRESETS: PosterPreset[] = [
   {
     slug: "showcase-three-continents",
     slot: "showcase",
-    templateId: "constellation",
+    templateId: "celestial",
     units: "km",
     home: home("Singapore", 1.3521, 103.8198),
     places: [
@@ -186,7 +190,7 @@ export const PRESETS: PosterPreset[] = [
   {
     slug: "showcase-one-long-road-trip",
     slot: "showcase",
-    templateId: "art-deco",
+    templateId: "mid-century",
     units: "mi",
     home: home("Chicago", 41.8781, -87.6298),
     places: [

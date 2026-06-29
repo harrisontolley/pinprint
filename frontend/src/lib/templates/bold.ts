@@ -1,20 +1,21 @@
 import type { TemplateSpec } from "./types";
 
 /**
- * Bold modern — white field, thick arrows with solid triangular heads tinted by
- * affiliation, heavy geometric sans (Archivo), large high-contrast labels. The
- * graphic-poster look; affiliation color is loud and front-and-center.
+ * Bold modern — a 2026 gallery-poster. Warm off-white field, thick arrows with
+ * solid triangular heads tinted by a curated warm-forward palette, heavy
+ * geometric sans (Archivo) as the focal point, large high-contrast labels.
+ * Affiliation color is loud and front-and-center.
  */
 export const bold: TemplateSpec = {
   id: "bold-modern",
   name: "Bold Modern",
-  blurb: "Thick arrows, vivid color, heavy sans.",
+  blurb: "Warm off-white, heavy grotesque, vibrant arrows.",
 
-  paper: "#ffffff",
+  paper: "#f7f4ee",
   paperEdge: null,
-  ink: "#111111",
-  inkSoft: "#6b6b6b",
-  accent: "#e4572e",
+  ink: "#1a1714",
+  inkSoft: "#6b645c",
+  accent: "#c8502a",
   border: null,
 
   rose: "none",
@@ -28,14 +29,14 @@ export const bold: TemplateSpec = {
   distFamily: "var(--font-archivo)",
 
   titleWeight: 900,
-  titleLetterSpacing: -1,
+  titleLetterSpacing: -1.5,
   nameTransform: "uppercase",
   nameWeight: 800,
   nameLetterSpacing: 0.5,
   distItalic: false,
   distLetterSpacing: 0.5,
 
-  titleSize: 96,
+  titleSize: 100,
   subtitleSize: 22,
   nameSize: 27,
   distSize: 18,
@@ -47,10 +48,10 @@ export const bold: TemplateSpec = {
   iconSize: 22,
 
   affiliationColors: {
-    born: "#f5a623",
-    lived: "#22a06b",
-    visited: "#2b7fe4",
-    family: "#e4572e",
+    born: "#e0922a",
+    lived: "#4f8a6a",
+    visited: "#2d7d8f",
+    family: "#c8502a",
   },
   colorizeArrows: true,
   glyphOpacity: 1,

@@ -1,6 +1,10 @@
 import type { Affiliation } from "../types";
 
 export type TemplateId =
+  | "warm-minimal"
+  | "mid-century"
+  | "swiss-editorial"
+  | "celestial"
   | "vintage-cartography"
   | "minimal-compass"
   | "bold-modern"
