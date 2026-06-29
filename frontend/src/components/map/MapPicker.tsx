@@ -86,7 +86,7 @@ export default function MapPicker() {
       center={center}
       zoom={2}
       worldCopyJump
-      className="h-full w-full"
+      className="isolate h-full w-full"
       style={{ background: "#e9e9ea" }}
     >
       <TileLayer

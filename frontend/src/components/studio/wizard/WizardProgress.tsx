@@ -23,7 +23,6 @@ export function WizardProgress({
   onJump: (index: number) => void;
   className?: string;
 }) {
-  const pct = ((current + 1) / steps.length) * 100;
   const active = steps[current];
 
   return (
@@ -31,25 +30,42 @@ export function WizardProgress({
       aria-label="Progress"
       className={`shrink-0 border-b border-hairline bg-canvas ${className}`}
     >
-      {/* Mobile: compact label + progress bar */}
-      <div className="px-5 py-2.5 lg:hidden">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-            Step {current + 1} of {steps.length}
-          </span>
-          <span className="truncate text-sm font-medium text-ink">
-            {active.label}
-            {active.optional && (
-              <span className="ml-1 text-xs font-normal text-muted">· optional</span>
-            )}
-          </span>
-        </div>
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-pill bg-hairline">
-          <div
-            className="h-full rounded-pill bg-primary transition-[width] duration-300"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+      {/* Mobile: tappable numbered steps + current label */}
+      <div className="px-4 py-2.5 lg:hidden">
+        <ol className="flex items-center">
+          {steps.map((s, i) => {
+            const isActive = i === current;
+            const isDone = i < current;
+            const reachable = i <= furthest;
+            return (
+              <li key={s.id} className="flex flex-1 items-center last:flex-none">
+                <button
+                  type="button"
+                  onClick={() => reachable && onJump(i)}
+                  disabled={!reachable}
+                  aria-current={isActive ? "step" : undefined}
+                  aria-label={`Step ${i + 1}: ${s.label}`}
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-pill border text-xs font-semibold transition-colors disabled:cursor-default ${
+                    isActive || isDone
+                      ? "border-primary bg-primary text-on-primary"
+                      : reachable
+                        ? "border-hairline-strong text-body"
+                        : "border-hairline-strong text-muted-soft"
+                  } ${isActive ? "ring-2 ring-primary/20" : ""}`}
+                >
+                  {isDone ? "✓" : i + 1}
+                </button>
+                {i < steps.length - 1 && (
+                  <span
+                    className={`h-px flex-1 ${i < current ? "bg-primary" : "bg-hairline"}`}
+                    aria-hidden
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        <p className="mt-2 text-sm font-medium text-ink">{active.label}</p>
       </div>
 
       {/* Desktop: horizontal numbered steps */}

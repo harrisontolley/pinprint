@@ -21,17 +21,15 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Step 2 — home + related places, in three clear bands: Search (sets home first,
- * then adds places), Your places (the list, home pinned on top), and Or drop a
- * pin (the map). The first place becomes home — the centre of the poster.
+ * Step 3 — the places you have ties to (home is already set on the previous
+ * step). Search adds a place, the list shows them (home pinned on top), and the
+ * map is a click-to-add alternative. The "Your places" band sits above the map in
+ * stacking so the affiliation dropdown never hides behind it.
  */
 export function StepPlaces() {
   const home = usePosterStore((s) => s.home);
-  const places = usePosterStore((s) => s.places);
   const addFromGeo = usePosterStore((s) => s.addFromGeo);
   const [notice, setNotice] = useState<string | null>(null);
-
-  const hasAny = !!home || places.length > 0;
 
   function flash(msg: string) {
     setNotice(msg);
@@ -42,28 +40,31 @@ export function StepPlaces() {
     const result = addFromGeo(r);
     if (result === "duplicate") flash(`${r.label} is already on your map`);
     else if (result === "home") flash(`${r.label} set as home`);
+    else flash(`Added ${r.label}`);
+  }
+
+  if (!home) {
+    return (
+      <div className="rounded-xl border border-hairline bg-surface-card p-4 text-sm text-muted">
+        Set your home first — tap{" "}
+        <span className="font-medium text-ink">Home</span> in the steps above.
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-2">
-        <SectionLabel>Search</SectionLabel>
+        <SectionLabel>Add a place</SectionLabel>
         <PlaceSearch onSelect={handleSelect} />
-        {notice ? (
-          <p className="text-xs text-muted">{notice}</p>
-        ) : !home ? (
-          <p className="text-xs text-muted">
-            Start with your home town — it sits at the centre of your poster.
-          </p>
-        ) : (
-          <p className="text-xs text-muted">
-            Add the places you have ties to — born, lived, visited, family.
-          </p>
-        )}
+        <p className="text-xs text-muted">
+          {notice ??
+            "Add the places you have ties to — born, lived, visited, family."}
+        </p>
       </section>
 
-      <section className="flex flex-col gap-2">
-        {hasAny && <SectionLabel>Your places</SectionLabel>}
+      <section className="relative z-10 flex flex-col gap-2">
+        <SectionLabel>Your places</SectionLabel>
         <PlaceList />
       </section>
 

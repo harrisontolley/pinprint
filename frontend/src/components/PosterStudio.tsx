@@ -12,6 +12,7 @@ import { PRODUCTS_BY_ID } from "@/lib/commerce/printProducts";
 import type { StudioSelection } from "@/lib/commerce/price";
 import { useCartStore } from "@/lib/store/cartStore";
 import { snapshotPosterConfig } from "@/lib/commerce/posterConfig";
+import { SEED_HOME, SEED_PLACES } from "@/lib/seed";
 import type { TemplateId, VintageVariant } from "@/lib/templates/types";
 import { exportSvg, exportPng, exportPngBlob, slugify } from "@/lib/export";
 import { uploadPosterPng } from "@/lib/upload/uploadPosterPng";
@@ -22,6 +23,7 @@ import { BuyBar } from "@/components/studio/BuyBar";
 import { WizardProgress } from "@/components/studio/wizard/WizardProgress";
 import { WizardNav, type NavAction } from "@/components/studio/wizard/WizardNav";
 import { StepStyle } from "@/components/studio/wizard/steps/StepStyle";
+import { StepHome } from "@/components/studio/wizard/steps/StepHome";
 import { StepPlaces } from "@/components/studio/wizard/steps/StepPlaces";
 import { StepSize } from "@/components/studio/wizard/steps/StepSize";
 import { StepCustomize } from "@/components/studio/wizard/steps/StepCustomize";
@@ -96,14 +98,14 @@ export function PosterStudio() {
     if (variant && (VINTAGE_VARIANT_ORDER as string[]).includes(variant)) {
       setVintageVariant(variant as VintageVariant);
     }
-    // A deep link that pre-picks a style lands the user on Places — the look is
-    // already chosen, so their next decision is which places to add. Applied
+    // A deep link that pre-picks a style lands the user on Home — the look is
+    // already chosen, so their next decision is their central location. Applied
     // post-mount (like the template/variant above) so the server-rendered step 0
     // and the client agree — initializing from `window` would mismatch hydration.
     if (preselected) {
       /* eslint-disable react-hooks/set-state-in-effect */
-      setStep(STEP_INDEX.places);
-      setFurthest(STEP_INDEX.places);
+      setStep(STEP_INDEX.home);
+      setFurthest(STEP_INDEX.home);
       /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [setTemplate, setVintageVariant]);
@@ -163,9 +165,16 @@ export function PosterStudio() {
     window.setTimeout(() => setJustAdded(false), 2500);
   }
 
+  // Until the buyer sets their own home, the preview shows a labelled "Example"
+  // sample so the chosen style is still visible. Export/add-to-cart stay gated on
+  // the real `home`, so the sample never ships.
+  const usingSample = !home;
+  const previewHome = home ?? SEED_HOME;
+  const previewPlaces = home ? places : SEED_PLACES;
+
   const measured = useMeasuredLayout({
-    home,
-    places,
+    home: previewHome,
+    places: previewPlaces,
     units,
     template,
     width,
@@ -183,6 +192,8 @@ export function PosterStudio() {
     switch (current.id) {
       case "style":
         return <StepStyle />;
+      case "home":
+        return <StepHome />;
       case "places":
         return <StepPlaces />;
       case "size":
@@ -233,7 +244,8 @@ export function PosterStudio() {
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <PosterStage
           className="order-1 h-[38dvh] shrink-0 lg:order-2 lg:h-auto lg:min-h-0 lg:flex-1 lg:overflow-auto"
-          home={home}
+          sample={usingSample}
+          home={previewHome}
           items={items}
           template={template}
           units={units}

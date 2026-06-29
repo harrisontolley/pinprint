@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { usePosterStore } from "@/lib/store/posterStore";
 import { haversineKm, fmtDistance } from "@/lib/geo";
 import type { Place } from "@/lib/types";
@@ -33,6 +34,58 @@ function CloseGlyph() {
   );
 }
 
+function PencilGlyph() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden
+      className="shrink-0 text-muted-soft transition-colors group-hover:text-ink group-focus-within:text-ink"
+    >
+      <path
+        d="M10.5 2.5l3 3M2.5 13.5l.6-2.6 7.4-7.4 2 2-7.4 7.4-2.6.6z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * An obviously-editable name field: the text doubles as an input, with a pencil
+ * cue and a hover/focus background so it's clear you can click to rename.
+ */
+export function NameField({
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  ariaLabel: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <span
+      onClick={() => ref.current?.focus()}
+      className="group flex min-w-0 flex-1 cursor-text items-center gap-1 rounded-sm px-1 py-0.5 transition-colors hover:bg-surface-strong focus-within:bg-surface-card focus-within:ring-1 focus-within:ring-hairline-strong"
+    >
+      <input
+        ref={ref}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={ariaLabel}
+        className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none"
+      />
+      <PencilGlyph />
+    </span>
+  );
+}
+
 function IconButton({
   title,
   onClick,
@@ -63,16 +116,15 @@ function HomeRow({ home }: { home: Place }) {
   const setHome = usePosterStore((s) => s.setHome);
   return (
     <li className="rounded-lg border border-hairline-strong bg-surface-strong/50 p-2.5">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <span className="flex shrink-0 items-center gap-1 rounded-pill bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-on-primary">
           <HomeGlyph />
           Home
         </span>
-        <input
+        <NameField
           value={home.label}
-          onChange={(e) => setHome({ ...home, label: e.target.value })}
-          className="min-w-0 flex-1 rounded-sm bg-transparent px-1 py-0.5 text-sm font-medium text-ink outline-none focus:bg-surface-card focus:ring-1 focus:ring-hairline-strong"
-          aria-label="Home label"
+          onChange={(v) => setHome({ ...home, label: v })}
+          ariaLabel="Home label"
         />
       </div>
       <div className="mt-1 truncate pl-1 text-xs text-muted">
@@ -92,12 +144,11 @@ function PlaceRow({ place, home }: { place: Place; home: Place | null }) {
 
   return (
     <li className="rounded-lg border border-hairline bg-surface-card p-2.5">
-      <div className="flex items-center gap-2">
-        <input
+      <div className="flex items-center gap-1.5">
+        <NameField
           value={place.label}
-          onChange={(e) => updatePlace(place.id, { label: e.target.value })}
-          className="min-w-0 flex-1 rounded-sm bg-transparent px-1 py-0.5 text-sm font-medium text-ink outline-none focus:bg-surface-strong focus:ring-1 focus:ring-hairline-strong"
-          aria-label={`${place.label} label`}
+          onChange={(v) => updatePlace(place.id, { label: v })}
+          ariaLabel={`${place.label} label`}
         />
         {distance && (
           <span className="shrink-0 rounded-pill bg-surface-strong px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted">
@@ -145,6 +196,7 @@ export function PlaceList() {
 
   return (
     <div className="flex flex-col gap-2">
+      <p className="text-[11px] text-muted-soft">Tap a name to rename it.</p>
       <ul className="flex flex-col gap-1.5">
         {home && <HomeRow home={home} />}
         {places.map((p) => (

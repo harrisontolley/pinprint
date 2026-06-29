@@ -91,8 +91,11 @@ type PosterState = {
 };
 
 export const usePosterStore = create<PosterState>((set, get) => ({
-  home: SEED_HOME,
-  places: SEED_PLACES,
+  // Start empty — first-time buyers are guided to enter their own home + places.
+  // SEED_HOME/SEED_PLACES survive as the preview "Example" sample (PosterStudio)
+  // and the loadSeed() helper.
+  home: null,
+  places: [],
   units: "mi",
   bearingMode: "great-circle",
   templateId: DEFAULT_TEMPLATE_ID,
