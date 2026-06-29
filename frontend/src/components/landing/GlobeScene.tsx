@@ -13,17 +13,22 @@ import {
 } from "three";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import { SEED_HOME, SEED_PLACES } from "@/lib/seed";
-import { buildGlobeData, type GlobeArc, type GlobePoint } from "@/lib/globe/arcs";
+import {
+  buildGlobeData,
+  formatReadout,
+  type GlobeArc,
+  type GlobePoint,
+} from "@/lib/globe/arcs";
 
 /**
  * The actual react-globe.gl (three.js) scene. This is the ONLY module that pulls
  * three.js into a bundle, so it is always loaded via dynamic(ssr:false) from
- * GlobeDemo — never imported on the server. Sizing is driven by the parent
- * (the canvas needs explicit numeric width/height).
+ * GlobeDemo — never imported on the server. Sizing is driven by the parent.
  *
- * The globe is drawn as vector country outlines (Natural Earth GeoJSON) on a
- * solid ocean sphere — sharp at any size and on-brand for a cartographic poster
- * product, rather than a photo texture that blurs as the globe grows.
+ * Design: a "measured globe". Vector country outlines on a neutral sphere; arcs
+ * from home to each place with chevron arrowheads; and an on-brand HTML callout
+ * at each destination showing the EXACT bearing + great-circle distance. It
+ * settles into a composed frame on reveal, then holds still so the numbers read.
  */
 
 // Brand palette (globals.css @theme): neutral stone globe so the pastel orbs
@@ -32,7 +37,11 @@ const OCEAN = "#d6d3d1"; // --color-hairline-strong
 const LAND_FILL = "#ffffff"; // --color-surface-card
 const LAND_SIDE = "rgba(120,113,108,0.18)"; // muted, faint extrusion edge
 const BORDER = "#a8a29e"; // --color-muted-soft
-const LABEL_INK = "#0c0a09"; // --color-ink
+
+// Composed home frame, and the off-angle it eases in FROM on reveal.
+const FINAL_POV = { lat: 26, lng: -48, altitude: 1.9 };
+const START_LNG_OFFSET = -55;
+const SETTLE_MS = 1500;
 
 /** Natural Earth feature — only the fields we touch. */
 type GeoFeature = { geometry: { type: string; coordinates: unknown } };
@@ -54,6 +63,65 @@ const CHEVRON_GEOMETRY = buildChevronGeometry();
 const CHEVRON_SCALE = 0.075; // fraction of the globe radius
 const CHEVRON_ALT = 1.03; // radius multiplier — sits just above the surface
 
+/**
+ * Brand-styled DOM callout for a city: name + (for destinations) the exact
+ * "51° NE · 5,570 km" readout. Inline-styled (not Tailwind classes) so it renders
+ * reliably as a runtime-created node. react-globe overwrites the OUTER element's
+ * transform every frame for positioning, so the float-above offset lives on the
+ * inner chip; pointer-events are off so dragging the globe passes through.
+ */
+function buildCallout(p: GlobePoint): HTMLElement {
+  const outer = document.createElement("div");
+  outer.style.pointerEvents = "none";
+  outer.style.opacity = "0"; // faded in by the visibility modifier
+  outer.style.transition = "opacity .25s ease";
+
+  const chip = document.createElement("div");
+  chip.style.transform = "translateY(-135%)"; // float above the marker
+  chip.style.display = "inline-flex";
+  chip.style.flexDirection = "column";
+  chip.style.alignItems = "flex-start";
+  chip.style.gap = "1px";
+  chip.style.padding = "5px 9px";
+  chip.style.borderRadius = "10px";
+  chip.style.border = "1px solid #e7e5e4";
+  chip.style.background = "rgba(255,255,255,0.92)";
+  chip.style.boxShadow = "0 4px 14px rgba(12,10,9,0.10)";
+  chip.style.fontFamily = "var(--font-inter), system-ui, sans-serif";
+  chip.style.whiteSpace = "nowrap";
+
+  const name = document.createElement("div");
+  name.textContent = p.label;
+  name.style.fontSize = "12px";
+  name.style.fontWeight = "600";
+  name.style.lineHeight = "1.2";
+  name.style.color = "#0c0a09"; // --color-ink
+  chip.appendChild(name);
+
+  const sub = document.createElement("div");
+  sub.style.fontSize = "11px";
+  sub.style.lineHeight = "1.2";
+  sub.style.color = "#777169"; // --color-muted
+  if (
+    !p.isHome &&
+    p.bearingDeg != null &&
+    p.compass != null &&
+    p.distanceKm != null
+  ) {
+    sub.textContent = formatReadout({
+      bearingDeg: p.bearingDeg,
+      compass: p.compass,
+      distanceKm: p.distanceKm,
+    });
+  } else {
+    sub.textContent = "Home";
+  }
+  chip.appendChild(sub);
+
+  outer.appendChild(chip);
+  return outer;
+}
+
 type Props = {
   width: number;
   height: number;
@@ -62,7 +130,17 @@ type Props = {
 
 export default function GlobeScene({ width, height, reduceMotion }: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
+  const mountedRef = useRef(true);
   const [ready, setReady] = useState(false);
+  const [settled, setSettled] = useState(false);
+
+  // Guard async globe callbacks against StrictMode/HMR unmounts (dev only).
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const { arcs, points } = useMemo(
     () => buildGlobeData(SEED_HOME, SEED_PLACES),
     [],
@@ -89,27 +167,34 @@ export default function GlobeScene({ width, height, reduceMotion }: Props) {
     };
   }, []);
 
-  // Lock interaction to a gentle spin + drag, and frame the Atlantic so home
-  // (New York) and most destinations sit in view from the first paint.
-  function handleReady() {
+  // Settle, then hold: once the globe is ready, ease the camera from an off-angle
+  // into the composed home frame and STOP (no perpetual auto-rotate). The arcs
+  // animate on during the settle, then freeze solid. Reduced motion jumps
+  // straight to the held, annotated frame.
+  useEffect(() => {
+    if (!ready) return;
     const g = globeRef.current;
     if (!g) return;
     const controls = g.controls();
     controls.enableZoom = false;
     controls.enablePan = false;
-    controls.autoRotate = !reduceMotion;
-    controls.autoRotateSpeed = 0.45;
-    g.pointOfView({ lat: 26, lng: -48, altitude: 1.9 }, 0);
-    // Build the chevron layer now that getGlobeRadius()/getCoords() are valid.
-    setReady(true);
-  }
+    controls.autoRotate = false;
 
-  // Keep auto-rotation in sync if the user's reduced-motion preference changes.
-  useEffect(() => {
-    const g = globeRef.current;
-    if (!g) return;
-    g.controls().autoRotate = !reduceMotion;
-  }, [reduceMotion]);
+    if (reduceMotion) {
+      // arcsAnimating is already false when reduceMotion is true, so the arcs
+      // render solid without touching `settled`.
+      g.pointOfView(FINAL_POV, 0);
+      return;
+    }
+
+    g.pointOfView({ ...FINAL_POV, lng: FINAL_POV.lng + START_LNG_OFFSET }, 0);
+    const raf = requestAnimationFrame(() => g.pointOfView(FINAL_POV, SETTLE_MS));
+    const t = window.setTimeout(() => setSettled(true), SETTLE_MS + 400);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+    };
+  }, [ready, reduceMotion]);
 
   // Chevron arrowheads as a custom three.js layer: one flat chevron at each
   // arc's destination, oriented along the great-circle bearing (direction of
@@ -143,6 +228,9 @@ export default function GlobeScene({ width, height, reduceMotion }: Props) {
     mesh.position.copy(end.multiplyScalar(R * CHEVRON_ALT));
   };
 
+  // Arcs march on during the settle, then hold solid.
+  const arcsAnimating = !reduceMotion && !settled;
+
   return (
     <Globe
       ref={globeRef}
@@ -154,7 +242,9 @@ export default function GlobeScene({ width, height, reduceMotion }: Props) {
       showAtmosphere
       atmosphereColor="#cfcbc6"
       atmosphereAltitude={0.2}
-      onGlobeReady={handleReady}
+      onGlobeReady={() => {
+        if (mountedRef.current) setReady(true);
+      }}
       // Country outlines.
       polygonsData={countries}
       polygonGeoJsonGeometry={(d: object) => (d as GeoFeature).geometry as never}
@@ -173,9 +263,9 @@ export default function GlobeScene({ width, height, reduceMotion }: Props) {
       arcLabel={(d) => (d as GlobeArc).label}
       arcStroke={0.55}
       arcAltitudeAutoScale={0.35}
-      arcDashLength={reduceMotion ? 1 : 0.5}
-      arcDashGap={reduceMotion ? 0 : 0.22}
-      arcDashAnimateTime={reduceMotion ? 0 : 2200}
+      arcDashLength={arcsAnimating ? 0.5 : 1}
+      arcDashGap={arcsAnimating ? 0.22 : 0}
+      arcDashAnimateTime={arcsAnimating ? 2200 : 0}
       // City markers.
       pointsData={points}
       pointLat={(d) => (d as GlobePoint).lat}
@@ -184,16 +274,15 @@ export default function GlobeScene({ width, height, reduceMotion }: Props) {
       pointRadius={(d) => ((d as GlobePoint).isHome ? 0.9 : 0.65)}
       pointAltitude={0.03}
       pointLabel={(d) => (d as GlobePoint).label}
-      // City names.
-      labelsData={points}
-      labelLat={(d) => (d as GlobePoint).lat}
-      labelLng={(d) => (d as GlobePoint).lng}
-      labelText={(d) => (d as GlobePoint).label}
-      labelColor={() => LABEL_INK}
-      labelSize={(d) => ((d as GlobePoint).isHome ? 2 : 1.5)}
-      labelDotRadius={0}
-      labelAltitude={0.035}
-      labelResolution={2}
+      // Bearing + distance callouts (brand HTML chips at each city).
+      htmlElementsData={ready ? points : []}
+      htmlLat={(d) => (d as GlobePoint).lat}
+      htmlLng={(d) => (d as GlobePoint).lng}
+      htmlAltitude={0.04}
+      htmlElement={(d) => buildCallout(d as GlobePoint)}
+      htmlElementVisibilityModifier={(el, isVisible) => {
+        (el as HTMLElement).style.opacity = isVisible ? "1" : "0";
+      }}
       // Chevron arrowheads at each destination (built once the globe is ready).
       customLayerData={ready ? arcs : []}
       customThreeObject={makeChevron}

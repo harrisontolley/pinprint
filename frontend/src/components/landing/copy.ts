@@ -153,9 +153,10 @@ export const copy = {
   },
 
   globe: {
-    eyebrow: "Drawn true",
-    headline: "Real bearings, not decoration.",
-    body: "Here's New York and five places it's tied to. Each arc follows the great-circle path — the real shortest line across the globe — and the same maths draws every arrow on your poster.",
+    eyebrow: "Why Pinprint",
+    headline: "The exact bearing. The real distance.",
+    body: "Most map prints just drop a pin. Pinprint measures the true compass bearing and the great-circle distance from home to every place, then draws each one to scale. The numbers on the globe are exactly what we print on your poster.",
+    caption: "Example measured from New York. Your poster measures from your home.",
   },
 
   showcase: {

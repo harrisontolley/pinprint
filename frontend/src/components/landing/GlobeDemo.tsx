@@ -17,10 +17,11 @@ const GlobeScene = dynamic(() => import("./GlobeScene"), {
 });
 
 /**
- * Landing-page centerpiece: a rotating 3D globe drawing great-circle arcs from
- * home to each place, mirroring how a poster encodes home -> places. It's the
- * one intentional exception to DESIGN.md's "no animation" rule, kept contained:
- * below the fold, lazily mounted, and fully static under prefers-reduced-motion.
+ * The differentiator band: a "measured globe" that proves Pinprint computes the
+ * exact bearing + great-circle distance from home to each place (the same numbers
+ * it prints). Two columns on desktop — message left, globe right. The globe
+ * settles into a composed frame on reveal then holds still so the readouts are
+ * legible; it's lazily mounted and fully static under prefers-reduced-motion.
  */
 export function GlobeDemo() {
   const { globe } = copy;
@@ -74,30 +75,35 @@ export function GlobeDemo() {
 
   return (
     <Section id="globe" orbs="preview">
-      <div className="flex flex-col items-start gap-4">
-        <SectionLabel>{globe.eyebrow}</SectionLabel>
-        <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.17] tracking-[-0.36px] text-ink">
-          {globe.headline}
-        </h2>
-        <p className="max-w-[52ch] text-[16px] leading-[1.5] tracking-[0.16px] text-body">
-          {globe.body}
-        </p>
-      </div>
+      <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12">
+        {/* Left: the differentiation, in words. */}
+        <div className="flex flex-col items-start gap-4">
+          <SectionLabel>{globe.eyebrow}</SectionLabel>
+          <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.17] tracking-[-0.36px] text-ink">
+            {globe.headline}
+          </h2>
+          <p className="max-w-[52ch] text-[16px] leading-[1.5] tracking-[0.16px] text-body">
+            {globe.body}
+          </p>
+          <p className="text-[13px] leading-[1.5] text-muted">{globe.caption}</p>
+        </div>
 
-      <div className="mt-10 flex justify-center">
-        {/* Square box reserves height so the late mount causes no layout shift. */}
-        <div
-          ref={wrapRef}
-          className="relative aspect-square w-full max-w-[760px]"
-          aria-hidden
-        >
-          {ready && (
-            <GlobeScene
-              width={size.width}
-              height={size.height}
-              reduceMotion={reduceMotion}
-            />
-          )}
+        {/* Right: the measured globe. Square box reserves height so the late
+            mount causes no layout shift. */}
+        <div className="flex justify-center md:justify-end">
+          <div
+            ref={wrapRef}
+            className="relative aspect-square w-full max-w-[560px]"
+            aria-hidden
+          >
+            {ready && (
+              <GlobeScene
+                width={size.width}
+                height={size.height}
+                reduceMotion={reduceMotion}
+              />
+            )}
+          </div>
         </div>
       </div>
     </Section>
