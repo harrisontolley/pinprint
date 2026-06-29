@@ -6,6 +6,7 @@
 
 export {
   formatUsd,
+  discountPercent,
   selectionTotalCents,
   selectionLineItems,
   buildSelection,

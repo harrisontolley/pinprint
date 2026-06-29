@@ -10,6 +10,7 @@ import { CartNav } from "@/components/cart/CartNav";
 import { Card } from "@/components/account/Card";
 import { Button } from "@/components/ui/Button";
 import { formatUsd } from "@/lib/commerce/price";
+import { FREE_SHIPPING } from "@/lib/commerce/pricing";
 import {
   cartSubtotalCents,
   useCartStore,
@@ -28,6 +29,14 @@ function lineDescriptor(item: CartItem): string {
   const { selection } = item;
   if (selection.format === "digital") return "Digital download";
   return selection.addFrame ? "Framed print + digital file" : "Print + digital file";
+}
+
+/** Anchor ("regular") total for one unit, summing each line's list price. */
+function selectionListCents(item: CartItem): number {
+  return item.selection.lineItems.reduce(
+    (sum, li) => sum + (li.listCents ?? li.cents),
+    0,
+  );
 }
 
 export default function CartPage() {
@@ -51,6 +60,11 @@ export default function CartPage() {
     mounted && new URLSearchParams(window.location.search).get("canceled") === "1";
 
   const subtotal = cartSubtotalCents(items);
+  const listSubtotal = items.reduce(
+    (sum, i) => sum + selectionListCents(i) * i.quantity,
+    0,
+  );
+  const saved = Math.max(0, listSubtotal - subtotal);
 
   async function checkout() {
     if (items.length === 0) return;
@@ -141,6 +155,9 @@ export default function CartPage() {
             <ul className="flex flex-col gap-3">
               {items.map((item) => {
                 const lineTotal = item.selection.totalCents * item.quantity;
+                const listEach = selectionListCents(item);
+                const eachDiscounted = listEach > item.selection.totalCents;
+                const listLineTotal = listEach * item.quantity;
                 return (
                   <li key={item.id}>
                     <Card className="flex items-start justify-between gap-4 p-5">
@@ -150,6 +167,11 @@ export default function CartPage() {
                         </p>
                         <p className="mt-0.5 text-sm text-muted">{lineDescriptor(item)}</p>
                         <p className="mt-0.5 text-xs text-muted">
+                          {eachDiscounted && (
+                            <span className="line-through">
+                              {formatUsd(listEach)}
+                            </span>
+                          )}{" "}
                           {formatUsd(item.selection.totalCents)} each
                         </p>
                         <div className="mt-3 flex items-center gap-3">
@@ -184,8 +206,15 @@ export default function CartPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="shrink-0 font-display text-lg text-ink">
-                        {formatUsd(lineTotal)}
+                      <div className="shrink-0 text-right">
+                        {eachDiscounted && (
+                          <div className="text-xs text-muted line-through">
+                            {formatUsd(listLineTotal)}
+                          </div>
+                        )}
+                        <div className="font-display text-lg text-ink">
+                          {formatUsd(lineTotal)}
+                        </div>
                       </div>
                     </Card>
                   </li>
@@ -201,9 +230,17 @@ export default function CartPage() {
                   <dt className="text-muted">Subtotal</dt>
                   <dd className="text-ink">{formatUsd(subtotal)}</dd>
                 </div>
+                {saved > 0 && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted">You save</dt>
+                    <dd className="text-success">−{formatUsd(saved)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <dt className="text-muted">Shipping</dt>
-                  <dd className="text-ink">Free</dd>
+                  <dd className="text-ink">
+                    {FREE_SHIPPING ? "Free" : "Calculated at checkout"}
+                  </dd>
                 </div>
                 <div className="mt-2 flex justify-between border-t border-hairline pt-3 text-base">
                   <dt className="font-medium text-ink">Total</dt>

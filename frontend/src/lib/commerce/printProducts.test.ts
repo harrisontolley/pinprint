@@ -55,6 +55,23 @@ describe("print products", () => {
     }
   });
 
+  it("anchors each offered size above its charged price (honest 25% off)", () => {
+    for (const p of OFFERED_PRODUCTS) {
+      expect(p.listPriceCents).toBeGreaterThan(p.priceCents);
+      // Floored to match discountPercent — the badge must never overstate.
+      const off = Math.floor(
+        ((p.listPriceCents - p.priceCents) / p.listPriceCents) * 100,
+      );
+      expect(off).toBe(25);
+    }
+  });
+
+  it("never lets an anchor fall below its charged price", () => {
+    for (const p of PRINT_PRODUCTS) {
+      expect(p.listPriceCents).toBeGreaterThanOrEqual(p.priceCents);
+    }
+  });
+
   it("reuses the engine's viewBox per orientation", () => {
     const expected = {
       portrait: POSTER_SIZES.portrait,

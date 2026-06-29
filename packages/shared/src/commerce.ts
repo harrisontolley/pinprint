@@ -13,28 +13,55 @@ import type { OrderStatus } from "./orders.js";
 
 /** Print retail by product id (the surfaced 2:3 portrait ladder). */
 export const PRINT_PRICE_CENTS: Record<string, number> = {
-  "portrait-12x18": 3900, // good
+  "portrait-12x18": 4500, // good (lifted off the under-market $39 entry)
   "portrait-16x24": 5900, // popular / hero
   "portrait-24x36": 8900, // premium anchor
 };
 
 /**
+ * Anchor ("regular") price by product id, shown struck-through next to the
+ * charged price above. The custom-map-poster category (Mapiful, Grafomap,
+ * Positive Prints, …) sells against a permanent "Save ~25%" discount, so we
+ * anchor each list price ≈ charged ÷ 0.75 (clean round number) and charge the
+ * sale price. This is display-only: the price actually charged is always
+ * PRINT_PRICE_CENTS — there is no Stripe coupon and the server re-derives the
+ * sale price (see selectionTotalCents). A list ≤ charged ⇒ no badge.
+ */
+export const LIST_PRICE_CENTS: Record<string, number> = {
+  "portrait-12x18": 6000, // 25% off $45
+  "portrait-16x24": 7900, // 25% off $59 (true 25.3%, floored to 25)
+  "portrait-24x36": 11900, // 25% off $89 (true 25.2%, floored to 25)
+};
+
+/**
  * Ready-to-hang frame upcharge by product id (added on top of the print). Set to
  * protect margin against the real oak-frame COGS verified live from Artelo
- * (framed landed cost ≈ $33.86 / $44.35 / $89.16): a +$110 24×36 upcharge keeps
- * the framed 24×36 at ~55% margin instead of the ~6%-on-the-upcharge it was.
+ * (framed landed cost ≈ $33.86 / $44.35 / $89.16): the +$100 24×36 upcharge keeps
+ * the framed 24×36 ($189) at ~53% margin instead of the ~6%-on-the-upcharge it was.
  */
 export const FRAME_UPCHARGE_CENTS: Record<string, number> = {
-  "portrait-12x18": 5000, // framed total $89
+  "portrait-12x18": 5000, // framed total $95
   "portrait-16x24": 6000, // framed total $119
-  "portrait-24x36": 11000, // framed total $199 (premium anchor)
+  "portrait-24x36": 10000, // framed total $189 (~53% margin, off the top-of-market ceiling)
 };
 
 /** Standalone digital download — also included free with any print. */
 export const DIGITAL_PRICE_CENTS = 1900;
 
+/** Anchor ("regular") price for the digital download — display-only strike-through. */
+export const DIGITAL_LIST_PRICE_CENTS = 2500;
+
 /** Frame upcharge fallback for sizes we keep but don't currently surface. */
 export const DEFAULT_FRAME_UPCHARGE_CENTS = 6000;
+
+/**
+ * Shipping policy: free standard shipping on every order, no threshold. The
+ * per-size Artelo COGS already include US shipping, so margins (~62–73%) absorb
+ * it, and most orders are a single poster (a threshold would only add friction).
+ * Checkout charges $0 shipping (`shippingCents: 0`); this flag single-sources the
+ * customer-facing "Free shipping" copy so the policy lives in one place.
+ */
+export const FREE_SHIPPING = true;
 
 // ── Catalogue (numeric base, no viewBox) ─────────────────────────────────────
 
@@ -51,8 +78,13 @@ export type ProductBase = {
   label: string;
   widthIn: number;
   heightIn: number;
-  /** Retail price in integer USD cents. */
+  /** Retail price in integer USD cents (the price actually charged). */
   priceCents: number;
+  /**
+   * Anchor ("regular") price in integer USD cents, shown struck-through. Equals
+   * priceCents when there's no discount to display.
+   */
+  listPriceCents: number;
   /** Ready-to-hang frame upcharge, added on top of priceCents. */
   frameUpchargeCents: number;
   popular?: boolean;
@@ -64,20 +96,40 @@ function product(
   orientation: Orientation,
   widthIn: number,
   heightIn: number,
-  opts: { priceCents?: number; popular?: boolean; badge?: string } = {},
+  opts: {
+    priceCents?: number;
+    listPriceCents?: number;
+    popular?: boolean;
+    badge?: string;
+  } = {},
 ): ProductBase {
   const id = `${orientation}-${widthIn}x${heightIn}`;
+  const priceCents = opts.priceCents ?? PRINT_PRICE_CENTS[id] ?? 0;
   return {
     id,
     orientation,
     label: `${widthIn} × ${heightIn} in`,
     widthIn,
     heightIn,
-    priceCents: opts.priceCents ?? PRINT_PRICE_CENTS[id] ?? 0,
+    priceCents,
+    // Fall back to the sale price for sizes without an anchor ⇒ no discount shown.
+    listPriceCents: opts.listPriceCents ?? LIST_PRICE_CENTS[id] ?? priceCents,
     frameUpchargeCents: FRAME_UPCHARGE_CENTS[id] ?? DEFAULT_FRAME_UPCHARGE_CENTS,
     popular: opts.popular,
     badge: opts.badge,
   };
+}
+
+/**
+ * Whole-percent discount of a sale price against its anchor, e.g.
+ * (7900, 5900) → 25. Returns 0 when there's nothing to advertise (list ≤ price).
+ *
+ * Floored, never rounded: the advertised number must never overstate the real
+ * saving (a true 25.3% off shows "25%", a true 24.6% shows "24%", not "25%").
+ */
+export function discountPercent(listCents: number, priceCents: number): number {
+  if (listCents <= priceCents) return 0;
+  return Math.floor(((listCents - priceCents) / listCents) * 100);
 }
 
 export const PRINT_PRODUCTS_BASE: ProductBase[] = [
@@ -236,7 +288,12 @@ export function arteloProductInfoFor(
 
 export type StudioFormat = "print" | "digital";
 
-export type StudioLineItem = { label: string; cents: number };
+export type StudioLineItem = {
+  label: string;
+  cents: number;
+  /** Anchor price to strike through, when this line is discounted. */
+  listCents?: number;
+};
 
 /** A full snapshot of what the buyer is about to add — the cart/checkout input. */
 export type StudioSelection = {
@@ -281,10 +338,20 @@ export function selectionLineItems({
   addFrame,
 }: PriceInput): StudioLineItem[] {
   if (format === "digital") {
-    return [{ label: "Digital download", cents: DIGITAL_PRICE_CENTS }];
+    return [
+      {
+        label: "Digital download",
+        cents: DIGITAL_PRICE_CENTS,
+        listCents: DIGITAL_LIST_PRICE_CENTS,
+      },
+    ];
   }
   return [
-    { label: `${product.label} print`, cents: product.priceCents },
+    {
+      label: `${product.label} print`,
+      cents: product.priceCents,
+      listCents: product.listPriceCents,
+    },
     ...(addFrame
       ? [{ label: "Ready-to-hang frame", cents: product.frameUpchargeCents }]
       : []),

@@ -30,6 +30,16 @@ describe("priceCheckout — server price authority", () => {
     expect(lineItems[0].quantity).toBe(2);
   });
 
+  it("charges the sale price, never the (higher) display list anchor", () => {
+    // The anchor is display-only; the server must charge priceCents.
+    expect(popular.listPriceCents).toBeGreaterThan(popular.priceCents);
+    const { lineItems, subtotalCents } = priceCheckout([
+      { productId: "portrait-16x24", format: "print", addFrame: false, quantity: 1 },
+    ]);
+    expect(lineItems[0].price_data?.unit_amount).toBe(popular.priceCents);
+    expect(subtotalCents).toBeLessThan(popular.listPriceCents);
+  });
+
   it("folds the frame upcharge into the unit price", () => {
     const { orderItems, lineItems } = priceCheckout([
       { productId: "portrait-16x24", format: "print", addFrame: true, quantity: 1 },

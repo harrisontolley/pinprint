@@ -1,8 +1,11 @@
 "use client";
 
 import { usePosterStore } from "@/lib/store/posterStore";
-import { formatUsd } from "@/lib/commerce/price";
-import { DIGITAL_PRICE_CENTS } from "@/lib/commerce/pricing";
+import { formatUsd, discountPercent } from "@/lib/commerce/price";
+import {
+  DIGITAL_PRICE_CENTS,
+  DIGITAL_LIST_PRICE_CENTS,
+} from "@/lib/commerce/pricing";
 
 /**
  * The digital file as a low-friction tripwire. On the print path it's a quiet
@@ -12,14 +15,22 @@ import { DIGITAL_PRICE_CENTS } from "@/lib/commerce/pricing";
 export function DigitalOption() {
   const format = usePosterStore((s) => s.format);
   const setFormat = usePosterStore((s) => s.setFormat);
+  const off = discountPercent(DIGITAL_LIST_PRICE_CENTS, DIGITAL_PRICE_CENTS);
 
   if (format === "digital") {
     return (
       <div className="flex flex-col gap-0.5 rounded-xl border border-ink bg-surface-card p-3 ring-1 ring-ink">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-medium text-ink">Digital download</span>
-          <span className="font-display text-lg leading-none text-ink">
-            {formatUsd(DIGITAL_PRICE_CENTS)}
+          <span className="flex items-baseline gap-1.5 leading-none">
+            {off > 0 && (
+              <span className="text-xs text-muted line-through">
+                {formatUsd(DIGITAL_LIST_PRICE_CENTS)}
+              </span>
+            )}
+            <span className="font-display text-lg text-ink">
+              {formatUsd(DIGITAL_PRICE_CENTS)}
+            </span>
           </span>
         </div>
         <span className="text-xs text-muted">

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatUsd } from "@/lib/commerce/price";
+import { formatUsd, discountPercent } from "@/lib/commerce/price";
 import type { PrintProduct } from "@/lib/commerce/printProducts";
 
 /**
@@ -23,6 +23,7 @@ export function SizeCard({
   const gw = ratio >= 1 ? 30 : Math.round(30 * ratio);
   const gh = ratio >= 1 ? Math.round(30 / ratio) : 30;
   const badgeLabel = badge ?? (product.popular ? "Popular" : null);
+  const off = discountPercent(product.listPriceCents, product.priceCents);
 
   return (
     <button
@@ -50,8 +51,16 @@ export function SizeCard({
         />
       </span>
       <span className="text-sm font-medium text-ink">{product.label}</span>
-      <span className="text-sm text-body-strong">
-        {formatUsd(product.priceCents)}
+      <span className="flex items-baseline gap-1.5 text-sm">
+        {off > 0 && (
+          <span className="text-muted line-through">
+            {formatUsd(product.listPriceCents)}
+          </span>
+        )}
+        <span className="text-body-strong">{formatUsd(product.priceCents)}</span>
+        {off > 0 && (
+          <span className="font-semibold text-success">−{off}%</span>
+        )}
       </span>
     </button>
   );

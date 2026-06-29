@@ -11,6 +11,7 @@ import {
   type StudioSelection,
 } from "@/lib/commerce/price";
 import type { PrintProduct } from "@/lib/commerce/printProducts";
+import { FREE_SHIPPING } from "@/lib/commerce/pricing";
 
 /**
  * The sticky commerce strip. Shows a live total for the current selection
@@ -40,7 +41,16 @@ export function BuyBar({
 }) {
   const total = selectionTotalCents({ format, product, addFrame });
   const items = selectionLineItems({ format, product, addFrame });
-  const hint = canBuy ? "Free shipping" : "Add a place to start";
+  const savedCents = items.reduce(
+    (sum, it) => sum + Math.max(0, (it.listCents ?? it.cents) - it.cents),
+    0,
+  );
+  const shipNote = FREE_SHIPPING ? "Free shipping" : "Shipping calculated at checkout";
+  const hint = !canBuy
+    ? "Add a place to start"
+    : savedCents > 0
+      ? `${shipNote} · you save ${formatUsd(savedCents)}`
+      : shipNote;
   const title = format === "digital" ? "Digital download" : product.label;
   const subtitle =
     format === "digital"
@@ -58,6 +68,11 @@ export function BuyBar({
               {items.map((it) => (
                 <li key={it.label}>
                   {it.label}{" "}
+                  {it.listCents != null && it.listCents > it.cents && (
+                    <span className="text-muted line-through">
+                      {formatUsd(it.listCents)}
+                    </span>
+                  )}{" "}
                   <span className="text-body-strong">
                     {it.cents === 0 ? "Free" : formatUsd(it.cents)}
                   </span>
