@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { Affiliation, BearingMode, GeoResult, Place, Units } from "../types";
 import type { TemplateId, VintageVariant } from "../templates/types";
 import { DEFAULT_TEMPLATE_ID } from "../templates/registry";
@@ -90,7 +91,15 @@ type PosterState = {
   ) => "home" | "added" | "duplicate";
 };
 
-export const usePosterStore = create<PosterState>((set, get) => ({
+// The in-progress design is auto-saved to localStorage so a refresh or an
+// accidental navigation never wipes the buyer's work. Mirrors cartStore:
+// `skipHydration` keeps persistence off the SSR path (no hydration mismatch);
+// the studio rehydrates once after mount, then applies any ?template deep link
+// on top so an explicit link still wins (see PosterStudio). `partialize` saves
+// only the design data — never the setter functions.
+export const usePosterStore = create<PosterState>()(
+  persist(
+    (set, get) => ({
   // Start empty — first-time buyers are guided to enter their own home + places.
   // SEED_HOME/SEED_PLACES survive as the preview "Example" sample (PosterStudio)
   // and the loadSeed() helper.
@@ -154,4 +163,34 @@ export const usePosterStore = create<PosterState>((set, get) => ({
     set((st) => ({ places: [...st.places, geoToPlace(r, affiliation)] }));
     return "added";
   },
-}));
+    }),
+    {
+      name: "pinprint-draft-v1",
+      version: 1,
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+      partialize: (s) => ({
+        home: s.home,
+        places: s.places,
+        units: s.units,
+        bearingMode: s.bearingMode,
+        templateId: s.templateId,
+        vintageVariant: s.vintageVariant,
+        sizeId: s.sizeId,
+        productId: s.productId,
+        format: s.format,
+        addFrame: s.addFrame,
+        customization: s.customization,
+      }),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<PosterState>;
+        return {
+          ...current,
+          ...p,
+          // Backfill any customization keys added since the draft was saved.
+          customization: { ...DEFAULT_CUSTOMIZATION, ...(p.customization ?? {}) },
+        };
+      },
+    },
+  ),
+);

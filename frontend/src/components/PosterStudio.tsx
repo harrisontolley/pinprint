@@ -87,27 +87,35 @@ export function PosterStudio() {
   const back = () => goTo(step - 1);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tpl = params.get("template");
-    let preselected = false;
-    if (tpl && (TEMPLATE_ORDER as string[]).includes(tpl)) {
-      setTemplate(tpl as TemplateId);
-      preselected = true;
-    }
-    const variant = params.get("variant");
-    if (variant && (VINTAGE_VARIANT_ORDER as string[]).includes(variant)) {
-      setVintageVariant(variant as VintageVariant);
-    }
-    // A deep link that pre-picks a style lands the user on Home — the look is
-    // already chosen, so their next decision is their central location. Applied
-    // post-mount (like the template/variant above) so the server-rendered step 0
-    // and the client agree — initializing from `window` would mismatch hydration.
-    if (preselected) {
-      /* eslint-disable react-hooks/set-state-in-effect */
-      setStep(STEP_INDEX.home);
-      setFurthest(STEP_INDEX.home);
-      /* eslint-enable react-hooks/set-state-in-effect */
-    }
+    // Restore the auto-saved draft first, then layer any ?template/?variant deep
+    // link on top so an explicit link always wins over the restored design.
+    // Rehydration runs here (not app-wide) so this ordering is guaranteed;
+    // skipHydration kept it off the SSR path, so server step 0 and the first
+    // client render agree and there's no hydration mismatch.
+    let cancelled = false;
+    void Promise.resolve(usePosterStore.persist.rehydrate()).then(() => {
+      if (cancelled) return;
+      const params = new URLSearchParams(window.location.search);
+      const tpl = params.get("template");
+      let preselected = false;
+      if (tpl && (TEMPLATE_ORDER as string[]).includes(tpl)) {
+        setTemplate(tpl as TemplateId);
+        preselected = true;
+      }
+      const variant = params.get("variant");
+      if (variant && (VINTAGE_VARIANT_ORDER as string[]).includes(variant)) {
+        setVintageVariant(variant as VintageVariant);
+      }
+      // A deep link that pre-picks a style lands the user on Home — the look is
+      // already chosen, so their next decision is their central location.
+      if (preselected) {
+        setStep(STEP_INDEX.home);
+        setFurthest(STEP_INDEX.home);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [setTemplate, setVintageVariant]);
 
   // Move focus to the step heading on step change (skip the initial mount).
