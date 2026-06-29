@@ -23,10 +23,10 @@ export function LandingPage() {
       <SiteHeader />
       <Hero />
       <SocialProofBar />
+      <GlobeDemo />
       <Problem />
       <Features />
       <HowItWorks />
-      <GlobeDemo />
       <Showcase />
       <Testimonials />
       <Pricing />

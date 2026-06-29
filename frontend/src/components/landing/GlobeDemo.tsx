@@ -2,9 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Section } from "./Section";
 import { SectionLabel } from "./SectionLabel";
-import { copy } from "./copy";
+import { LandingPoster } from "./LandingPoster";
+import { PlaceSearch } from "@/components/controls/PlaceSearch";
+import { copy, STUDIO_HREF } from "./copy";
+import { GLOBE_DEMO_HOME, GLOBE_DEMO_PLACES } from "@/lib/globe/demoData";
+import type { GeoResult, Place } from "@/lib/types";
 
 // react-globe.gl pulls in three.js and touches the DOM at import, so it must be
 // client-only. dynamic(ssr:false) splits it into its own chunk; the in-view gate
@@ -17,10 +22,12 @@ const GlobeScene = dynamic(() => import("./GlobeScene"), {
 });
 
 /**
- * Landing-page centerpiece: a rotating 3D globe drawing great-circle arcs from
- * home to each place, mirroring how a poster encodes home -> places. It's the
- * one intentional exception to DESIGN.md's "no animation" rule, kept contained:
- * below the fold, lazily mounted, and fully static under prefers-reduced-motion.
+ * The differentiator band: a "measured globe" that proves Pinprint computes the
+ * exact bearing + great-circle distance from home to each place (the same numbers
+ * it prints). Two columns on desktop — message + a "try it from your home town"
+ * search on the left, globe on the right. The globe glides to frame the home then
+ * holds still; searching a new home recomputes every reading live. Lazily
+ * mounted and fully static under prefers-reduced-motion.
  */
 export function GlobeDemo() {
   const { globe } = copy;
@@ -28,6 +35,19 @@ export function GlobeDemo() {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [inView, setInView] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [home, setHome] = useState<Place>(GLOBE_DEMO_HOME);
+
+  function handleSelectHome(r: GeoResult) {
+    setHome({
+      id: r.id,
+      label: r.label,
+      fullName: r.fullName,
+      lat: r.lat,
+      lng: r.lng,
+      kind: r.kind,
+      affiliation: "lived",
+    });
+  }
 
   // Mount the globe only when the section nears the viewport (protects LCP and
   // defers the three.js chunk fetch). One-shot.
@@ -74,21 +94,50 @@ export function GlobeDemo() {
 
   return (
     <Section id="globe" orbs="preview">
-      <div className="flex flex-col items-start gap-4">
+      {/* Intro + the live "try it from your home" search. */}
+      <div className="flex max-w-2xl flex-col items-start gap-4">
         <SectionLabel>{globe.eyebrow}</SectionLabel>
         <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.17] tracking-[-0.36px] text-ink">
           {globe.headline}
         </h2>
-        <p className="max-w-[52ch] text-[16px] leading-[1.5] tracking-[0.16px] text-body">
+        <p className="text-[16px] leading-[1.5] tracking-[0.16px] text-body">
           {globe.body}
         </p>
+
+        <div className="mt-2 w-full max-w-sm">
+          <p className="mb-1.5 text-[13px] font-medium text-body-strong">
+            {globe.tryLabel}
+          </p>
+          <PlaceSearch
+            onSelect={handleSelectHome}
+            placeholder="Search your home town…"
+          />
+          <p className="mt-2 text-[13px] text-muted">
+            Measuring from{" "}
+            <span className="font-medium text-body-strong">{home.label}</span>
+            {home.id !== GLOBE_DEMO_HOME.id && (
+              <>
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => setHome(GLOBE_DEMO_HOME)}
+                  className="underline underline-offset-2 transition-colors hover:text-body"
+                >
+                  reset
+                </button>
+              </>
+            )}
+          </p>
+        </div>
       </div>
 
-      <div className="mt-10 flex justify-center">
+      {/* The measurement (globe) and its output (poster), both from the same
+          home — change it above and watch both update. */}
+      <div className="mt-12 grid items-center gap-8 md:grid-cols-2 md:gap-10">
         {/* Square box reserves height so the late mount causes no layout shift. */}
         <div
           ref={wrapRef}
-          className="relative aspect-square w-full max-w-[760px]"
+          className="relative mx-auto aspect-square w-full max-w-[560px]"
           aria-hidden
         >
           {ready && (
@@ -96,8 +145,23 @@ export function GlobeDemo() {
               width={size.width}
               height={size.height}
               reduceMotion={reduceMotion}
+              home={home}
+              places={GLOBE_DEMO_PLACES}
             />
           )}
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[400px] flex-col items-center gap-3">
+          <p className="self-start text-[13px] font-medium uppercase tracking-[0.08em] text-muted">
+            {globe.posterLabel}
+          </p>
+          <LandingPoster home={home} places={GLOBE_DEMO_PLACES} />
+          <Link
+            href={STUDIO_HREF}
+            className="text-[14px] font-medium text-ink underline underline-offset-4 transition-colors hover:text-body"
+          >
+            {globe.posterCta} →
+          </Link>
         </div>
       </div>
     </Section>
