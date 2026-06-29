@@ -26,6 +26,7 @@ export function Hero() {
               {hero.secondaryCta}
             </LinkButton>
           </div>
+          <p className="text-[14px] leading-[1.5] text-muted">{hero.reassurance}</p>
         </div>
 
         <div className="relative">

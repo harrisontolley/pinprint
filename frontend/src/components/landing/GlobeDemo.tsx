@@ -22,12 +22,14 @@ const GlobeScene = dynamic(() => import("./GlobeScene"), {
 });
 
 /**
- * The differentiator band: a "measured globe" that proves Pinprint computes the
- * exact bearing + great-circle distance from home to each place (the same numbers
- * it prints). Two columns on desktop — message + a "try it from your home town"
- * search on the left, globe on the right. The globe glides to frame the home then
- * holds still; searching a new home recomputes every reading live. Lazily
- * mounted and fully static under prefers-reduced-motion.
+ * The comprehension beat: teaches a first-time visitor how to *read* a Pinprint —
+ * home at the center, an arrow in each place's true compass bearing, the
+ * great-circle distance beside it (the same numbers it prints). A short decode
+ * list spells that out; a "try it from your home town" search lets them measure
+ * from their own home. Two columns on desktop — message + search on the left,
+ * the live globe on the right, and the poster it produces below. The globe
+ * glides to frame the home then holds still; searching a new home recomputes
+ * every reading live. Lazily mounted and fully static under prefers-reduced-motion.
  */
 export function GlobeDemo() {
   const { globe } = copy;
@@ -103,6 +105,17 @@ export function GlobeDemo() {
         <p className="text-[16px] leading-[1.5] tracking-[0.16px] text-body">
           {globe.body}
         </p>
+
+        <dl className="mt-2 flex flex-col gap-3">
+          {globe.annotations.map((a) => (
+            <div key={a.term} className="flex items-baseline gap-3">
+              <dt className="min-w-[5.5rem] shrink-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
+                {a.term}
+              </dt>
+              <dd className="text-[15px] leading-[1.47] text-body">{a.def}</dd>
+            </div>
+          ))}
+        </dl>
 
         <div className="mt-2 w-full max-w-sm">
           <p className="mb-1.5 text-[13px] font-medium text-body-strong">

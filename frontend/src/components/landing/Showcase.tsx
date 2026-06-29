@@ -7,7 +7,7 @@ import { copy } from "./copy";
 export function Showcase() {
   const { showcase } = copy;
   return (
-    <Section orbs="sidebar">
+    <Section id="showcase" orbs="sidebar">
       <div className="flex flex-col items-start gap-4">
         <SectionLabel>{showcase.eyebrow}</SectionLabel>
         <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.17] tracking-[-0.36px] text-ink">

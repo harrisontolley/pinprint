@@ -7,7 +7,6 @@ import { HowItWorks } from "./HowItWorks";
 import { GlobeDemo } from "./GlobeDemo";
 import { Showcase } from "./Showcase";
 import { Testimonials } from "./Testimonials";
-import { Pricing } from "./Pricing";
 import { FAQ } from "./FAQ";
 import { FinalCTA } from "./FinalCTA";
 import { SiteFooter } from "./SiteFooter";
@@ -29,7 +28,6 @@ export function LandingPage() {
       <HowItWorks />
       <Showcase />
       <Testimonials />
-      <Pricing />
       <FAQ />
       <FinalCTA />
       <SiteFooter />

@@ -25,21 +25,26 @@ export const copy = {
     // Absolute hrefs (`/#section`) so the shared header works from any route,
     // not just the landing page. FAQ points at the dedicated page.
     links: [
-      { label: "Features", href: "/#features" },
       { label: "How it works", href: "/#how-it-works" },
-      { label: "Pricing", href: "/#pricing" },
+      { label: "Styles", href: "/#features" },
+      { label: "Examples", href: "/#showcase" },
       { label: "FAQ", href: "/faq" },
     ],
   },
 
   hero: {
-    eyebrow: "Poster maps of the places that matter",
-    // [Outcome] without [pain] — landing-page-design headline formula.
-    headline: "Every place you love, pointed to from home.",
+    // Eyebrow names the category in plain words so a cold visitor knows what
+    // this is before reading anything else.
+    eyebrow: "Custom map poster",
+    // Emotional outcome in ≤12 words; the subhead carries the mechanic.
+    headline: "A map of everywhere that made you you.",
     subhead:
-      "Pick where home is. Add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one in its true compass direction, with the real distance beside it — ready to print and hang.",
+      "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one in its true compass direction, with the real distance beside it — ready to print and frame.",
     primaryCta: PRIMARY_CTA,
     secondaryCta: "See how it works",
+    // Small line under the CTAs — preserves the conversion value of the old
+    // pricing section (people need to know it costs nothing to start).
+    reassurance: "Free to design — pay only when you print.",
     media: {
       label: "Hero — a finished Pinprint poster, framed and hung above a reading chair",
       aspect: "16 / 9",
@@ -69,8 +74,8 @@ export const copy = {
   },
 
   features: {
-    eyebrow: "What you get",
-    headline: "One poster. Every tie to a place, drawn true.",
+    eyebrow: "Pick a look",
+    headline: "Four styles. The same places, drawn true.",
     items: [
       {
         title: "Vintage cartography",
@@ -114,8 +119,8 @@ export const copy = {
       },
     ],
     layoutEngine: {
-      title: "Labels that never collide",
-      body: "Add forty places and the names still don't overlap. Our layout engine nudges every label into clear space, so a crowded map stays readable at any print size.",
+      title: "Forty places. No overlapping labels.",
+      body: "Add as many places as you like and the names still don't collide. Our layout engine nudges every label into clear space — the arrows never move, so each bearing stays true — and a crowded map stays readable at any print size.",
       media: { label: "Before / after — overlapping pins vs. Pinprint's resolved labels", aspect: "16 / 10" },
     },
     exportCard: {
@@ -153,9 +158,15 @@ export const copy = {
   },
 
   globe: {
-    eyebrow: "Why Pinprint",
-    headline: "The exact bearing. The real distance.",
-    body: "Most map prints just drop a pin. Pinprint measures the true compass bearing and great-circle distance from home to every place, then draws each one to scale — the same numbers we print on your poster. Search your own home town and watch every reading change.",
+    eyebrow: "How to read it",
+    headline: "Home in the middle. Everywhere else, drawn true.",
+    body: "Here's what you're looking at. Your home sits at the center. Every other place gets an arrow pointing in its real compass direction, with the great-circle distance — the actual shortest path across the globe — printed beside it. Search your own home town and watch every reading change.",
+    // Three short labels that decode a single poster for a first-time visitor.
+    annotations: [
+      { term: "Home", def: "The center point. Everything is measured from here." },
+      { term: "The arrow", def: "Points in that place's true compass bearing from home." },
+      { term: "The number", def: "The real distance, as the crow flies." },
+    ],
     tryLabel: "Try it — measure from your home town",
     posterLabel: "The poster it makes",
     posterCta: "Make your own",
@@ -207,74 +218,26 @@ export const copy = {
   testimonials: {
     eyebrow: "What people say",
     headline: "The wall gift people actually keep.",
+    // NOTE: illustrative sample quotes with placeholder attributions — replace
+    // with real, permissioned customer testimonials before launch.
     items: [
       {
         quote:
           "I made one for my mum with every house we'd lived in. She cried, then asked me to make one for my aunt.",
-        name: "Reviewer name",
-        role: "Role / city placeholder",
+        name: "Hannah M.",
+        role: "Gift for her mum · Bristol",
       },
       {
         quote:
           "Forty-one places and not a single label overlapping. I don't know how it does it, but it looks printed by hand.",
-        name: "Reviewer name",
-        role: "Role / city placeholder",
+        name: "Daniel O.",
+        role: "Travel map · Toronto",
       },
       {
         quote:
           "Took five minutes. It's been on my wall for a year and people still ask about it.",
-        name: "Reviewer name",
-        role: "Role / city placeholder",
-      },
-    ],
-  },
-
-  pricing: {
-    eyebrow: "Pricing",
-    headline: "Start free. Pay when you print.",
-    note: "Placeholder pricing — replace amounts and limits before launch.",
-    tiers: [
-      {
-        name: "Free",
-        price: "$0",
-        cadence: "forever",
-        summary: "Design and preview as much as you want.",
-        features: [
-          "Every poster style",
-          "Unlimited places",
-          "Watermarked PNG preview",
-          "Save up to 3 posters",
-        ],
-        cta: "Start free",
-        featured: false,
-      },
-      {
-        name: "Maker",
-        price: "$12",
-        cadence: "one-off, per poster",
-        summary: "One poster, print-ready, no watermark.",
-        features: [
-          "Everything in Free",
-          "Print-quality PNG + SVG",
-          "No watermark",
-          "Custom title and legend",
-        ],
-        cta: PRIMARY_CTA,
-        featured: true,
-      },
-      {
-        name: "Studio",
-        price: "$29",
-        cadence: "per year",
-        summary: "For makers and gift-givers who do this often.",
-        features: [
-          "Everything in Maker",
-          "Unlimited print-ready exports",
-          "Early access to new styles",
-          "Priority support",
-        ],
-        cta: "Go Studio",
-        featured: false,
+        name: "Priya R.",
+        role: "Home office · Manchester",
       },
     ],
   },
@@ -390,7 +353,8 @@ export const copy = {
 
   finalCta: {
     headline: "Put your places on the wall.",
-    subhead: "Build your first poster in a few minutes. Free to start.",
+    subhead:
+      "Build your first poster in a few minutes. Free to design — pay only when you print.",
     cta: PRIMARY_CTA,
   },
 
@@ -400,9 +364,9 @@ export const copy = {
       {
         title: "Product",
         links: [
-          { label: "Features", href: "/#features" },
           { label: "How it works", href: "/#how-it-works" },
-          { label: "Pricing", href: "/#pricing" },
+          { label: "Styles", href: "/#features" },
+          { label: "Examples", href: "/#showcase" },
           { label: "Create a poster", href: STUDIO_HREF },
         ],
       },
