@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { geocodeReverse, geocodeSearch } from "./nominatim.js";
+import { geocodeReverse, geocodeSearch, isMaptilerConfigured } from "./nominatim.js";
 import { pingDb } from "./db.js";
 import { constructWebhookEvent, isStripeConfigured } from "./stripe.js";
 import { isArteloConfigured, verifyArteloWebhookSignature } from "./artelo.js";
@@ -49,6 +49,7 @@ function registerRoutes(r: Hono): Hono {
       admin: isAdminConfigured(),
       redis: isRedisConfigured(),
       sentry: isSentryConfigured(),
+      maptiler: isMaptilerConfigured(),
     }),
   );
 

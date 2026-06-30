@@ -2,16 +2,35 @@ import { Ratelimit } from "@upstash/ratelimit";
 import type { GeoResult } from "@pinprint/shared";
 import { getRedis, rk } from "./redis.js";
 
-// Server-side Nominatim client. Lives behind the route handlers so we can set a
-// descriptive User-Agent (browsers can't), respect the ~1 req/s usage policy,
-// and cache identical queries. Two cache tiers: an in-memory LRU (L1, per
-// instance) in front of a shared Redis cache (L2), so a result geocoded on one
-// serverless instance is reused by every other. A distributed gate keeps the
-// fleet-wide upstream rate within Nominatim's policy. All Redis paths degrade to
-// the original per-instance behaviour when Redis is unconfigured.
+// Server-side geocoding client. Lives behind the route handlers so we can keep
+// the key server-side (browsers never see it) and cache identical queries. Two
+// cache tiers: an in-memory LRU (L1, per instance) in front of a shared Redis
+// cache (L2), so a result geocoded on one serverless instance is reused by every
+// other. All Redis paths degrade to the original per-instance behaviour when
+// Redis is unconfigured.
+//
+// Upstream is MapTiler when MAPTILER_API_KEY is set (managed, has an SLA, allows
+// storage, real autocomplete), and falls back to public Nominatim otherwise.
+// The Nominatim path keeps the descriptive User-Agent + ~1 req/s gates that its
+// usage policy demands; the MapTiler path skips those gates (high-limit paid
+// API). Both upstreams map into the same GeoResult contract, so callers and the
+// frontend are provider-agnostic. Cache keys are namespaced by provider so a
+// key being added/removed never serves cross-provider entries.
 
 const UA = "Pinprint/1.0 (poster-map demo; contact htolley0@gmail.com)";
 const BASE = "https://nominatim.openstreetmap.org";
+const MAPTILER_BASE = "https://api.maptiler.com/geocoding";
+
+/** The MapTiler key, or null when unset (→ Nominatim fallback). Read per-call. */
+function getMaptilerKey(): string | null {
+  return process.env.MAPTILER_API_KEY ?? null;
+}
+
+/** True when MAPTILER_API_KEY is present. No network call (for /health). */
+export function isMaptilerConfigured(): boolean {
+  return Boolean(process.env.MAPTILER_API_KEY);
+}
+
 const TIMEOUT_MS = 8000;
 const MIN_INTERVAL_MS = 1100;
 const CACHE_MAX = 500;
@@ -143,6 +162,35 @@ function normalize(item: NominatimItem): GeoResult {
   };
 }
 
+// MapTiler returns a GeoJSON FeatureCollection. We only need a few fields.
+type MaptilerFeature = {
+  id?: string;
+  text?: string;
+  place_name?: string;
+  place_type?: string[];
+  center?: [number, number]; // [lng, lat]
+  properties?: { kind?: string; place_designation?: string; country_code?: string };
+};
+
+export function normalizeMaptiler(f: MaptilerFeature): GeoResult {
+  const center = Array.isArray(f.center) ? f.center : [NaN, NaN];
+  const fullName = f.place_name ?? "";
+  const label =
+    f.text && f.text.trim() ? f.text : (fullName.split(",")[0]?.trim() ?? "");
+  return {
+    id: f.id ?? fullName,
+    label,
+    fullName,
+    lng: Number(center[0]),
+    lat: Number(center[1]),
+    // Best analog to Nominatim's addresstype, used for the result "kind" chip.
+    kind: f.properties?.place_designation ?? f.properties?.kind ?? f.place_type?.[0],
+  };
+}
+
+const finite = (r: GeoResult): boolean =>
+  Number.isFinite(r.lat) && Number.isFinite(r.lng);
+
 async function fetchJson(url: string): Promise<unknown> {
   const res = await fetch(url, {
     headers: {
@@ -152,28 +200,62 @@ async function fetchJson(url: string): Promise<unknown> {
     },
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok) throw new Error(`nominatim ${res.status}`);
+  // Error carries only the status, never the URL (which holds the MapTiler key).
+  if (!res.ok) throw new Error(`geocode ${res.status}`);
   return res.json();
 }
 
-export async function geocodeSearch(q: string): Promise<GeoResult[]> {
-  const norm = q.trim().toLowerCase();
-  const l1Key = `s:${norm}`;
-  const l1 = cacheGet(l1Key);
-  if (l1) return l1;
-  const l2Key = rk("geo", "s", norm);
-  const l2 = await l2Get(l2Key);
-  if (l2) {
-    cacheSet(l1Key, l2);
-    return l2;
+// Forward query against the active upstream. MapTiler when keyed (autocomplete,
+// no rate gate); else the gated Nominatim path.
+async function searchUpstream(q: string): Promise<GeoResult[]> {
+  const key = getMaptilerKey();
+  if (key) {
+    const url = `${MAPTILER_BASE}/${encodeURIComponent(q)}.json?key=${key}&autocomplete=true&limit=8&language=en`;
+    const data = (await fetchJson(url)) as { features?: MaptilerFeature[] };
+    return (data.features ?? []).map(normalizeMaptiler).filter(finite);
   }
   await nominatimGate();
   await rateGate();
   const url = `${BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&addressdetails=1&limit=8`;
   const data = (await fetchJson(url)) as NominatimItem[];
-  const results = Array.isArray(data)
-    ? data.map(normalize).filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lng))
-    : [];
+  return Array.isArray(data) ? data.map(normalize).filter(finite) : [];
+}
+
+// Reverse query against the active upstream. MapTiler reverse takes `lng,lat`.
+async function reverseUpstream(
+  lat: number,
+  lng: number,
+): Promise<GeoResult | null> {
+  const key = getMaptilerKey();
+  if (key) {
+    const url = `${MAPTILER_BASE}/${lng},${lat}.json?key=${key}&limit=1&language=en`;
+    const data = (await fetchJson(url)) as { features?: MaptilerFeature[] };
+    const f = data.features?.[0];
+    const r = f ? normalizeMaptiler(f) : null;
+    return r && finite(r) ? r : null;
+  }
+  await nominatimGate();
+  await rateGate();
+  const url = `${BASE}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`;
+  const data = (await fetchJson(url)) as NominatimItem;
+  if (!data || data.error) return null;
+  const r = normalize(data);
+  return finite(r) ? r : null;
+}
+
+export async function geocodeSearch(q: string): Promise<GeoResult[]> {
+  const provider = getMaptilerKey() ? "mt" : "osm";
+  const norm = q.trim().toLowerCase();
+  const l1Key = `s:${provider}:${norm}`;
+  const l1 = cacheGet(l1Key);
+  if (l1) return l1;
+  const l2Key = rk("geo", provider, "s", norm);
+  const l2 = await l2Get(l2Key);
+  if (l2) {
+    cacheSet(l1Key, l2);
+    return l2;
+  }
+  const results = await searchUpstream(q);
   cacheSet(l1Key, results);
   await l2Set(l2Key, results);
   return results;
@@ -183,26 +265,23 @@ export async function geocodeReverse(
   lat: number,
   lng: number,
 ): Promise<GeoResult | null> {
+  const provider = getMaptilerKey() ? "mt" : "osm";
   const coords = `${lat.toFixed(4)},${lng.toFixed(4)}`;
-  const l1Key = `r:${coords}`;
+  const l1Key = `r:${provider}:${coords}`;
   const l1 = cacheGet(l1Key);
   if (l1) return l1[0] ?? null;
-  const l2Key = rk("geo", "r", coords);
+  const l2Key = rk("geo", provider, "r", coords);
   const l2 = await l2Get(l2Key);
   if (l2) {
     cacheSet(l1Key, l2);
     return l2[0] ?? null;
   }
-  await nominatimGate();
-  await rateGate();
-  const url = `${BASE}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`;
-  const data = (await fetchJson(url)) as NominatimItem;
-  if (!data || data.error) {
+  const result = await reverseUpstream(lat, lng);
+  if (!result) {
     cacheSet(l1Key, []);
     await l2Set(l2Key, []);
     return null;
   }
-  const result = normalize(data);
   cacheSet(l1Key, [result]);
   await l2Set(l2Key, [result]);
   return result;

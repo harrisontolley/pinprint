@@ -75,7 +75,7 @@ export function StepPlaces() {
             <MapPicker />
           </div>
           <p className="bg-surface-strong px-2.5 py-1.5 text-[11px] text-muted">
-            Click the map to drop a place · © OpenStreetMap · © CARTO
+            Click the map to drop a place · © OpenStreetMap · © OpenFreeMap
           </p>
         </div>
       </section>

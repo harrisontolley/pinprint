@@ -13,6 +13,7 @@ the exact command to verify your change.
 | **Artelo** | Print-on-demand fulfilment | [artelo.md](./artelo.md) | `backend/src/artelo.ts`, `backend/src/fulfillment.ts` | `frontend/src/lib/upload/*` |
 | **PostHog** | Analytics, replay, flags, errors | [posthog.md](./posthog.md) | optional | `frontend/src/app/providers.tsx` |
 | **Redis (Upstash)** | Distributed rate limiting, geocode cache + Nominatim gate, checkout idempotency | [redis.md](./redis.md) | `backend/src/redis.ts`, `backend/src/rateLimit.ts`, `backend/src/nominatim.ts` | `frontend/src/lib/redis.ts` (auth-proxy only) |
+| **MapTiler** | Geocoding (search + reverse), falls back to Nominatim; optional picker basemap | [maptiler.md](./maptiler.md) | `backend/src/nominatim.ts` | `NEXT_PUBLIC_MAP_STYLE_URL` (MapLibre picker) |
 
 Operator tooling (refunds, cancel, retry, observability) lives in the admin dashboard —
 see [../admin.md](../admin.md). Secrets workflow for all of them: [secrets.md](./secrets.md).

@@ -77,7 +77,7 @@ export function StepHome() {
                 <MapPicker />
               </div>
               <p className="bg-surface-strong px-2.5 py-1.5 text-[11px] text-muted">
-                Click the map to set your home · © OpenStreetMap · © CARTO
+                Click the map to set your home · © OpenStreetMap · © OpenFreeMap
               </p>
             </div>
           </div>
