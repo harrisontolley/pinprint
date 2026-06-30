@@ -348,7 +348,7 @@ export function selectionLineItems({
   }
   return [
     {
-      label: `${product.label} print`,
+      label: `${product.label} fine art print`,
       cents: product.priceCents,
       listCents: product.listPriceCents,
     },

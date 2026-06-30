@@ -9,7 +9,7 @@
  */
 
 export const STUDIO_HREF = "/studio";
-export const PRIMARY_CTA = "Create your poster";
+export const PRIMARY_CTA = "Create your print";
 
 /** A single FAQ entry. `featured` items are surfaced on the landing-page teaser. */
 export type FaqItem = { q: string; a: string; featured?: boolean };
@@ -35,21 +35,21 @@ export const copy = {
   hero: {
     // Eyebrow names the category in plain words so a cold visitor knows what
     // this is before reading anything else.
-    eyebrow: "Custom map poster",
+    eyebrow: "Custom fine art map",
     // Emotional outcome in ≤12 words; the subhead carries the mechanic.
     headline: "A map of everywhere that made you you.",
     subhead:
-      "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one in its true compass direction, with the real distance beside it — ready to print and frame.",
+      "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one in its true compass direction, with the real distance beside it — ready to frame and hang.",
     primaryCta: PRIMARY_CTA,
     secondaryCta: "See how it works",
     // Small line under the CTAs — preserves the conversion value of the old
     // pricing section (people need to know it costs nothing to start).
     reassurance: "Free to design — pay only when you print.",
     media: {
-      label: "Hero — a finished Pinprint poster, framed and hung above a reading chair",
+      label: "Hero — a finished Pinprint print, framed and hung above a reading chair",
       aspect: "16 / 9",
       src: "/showcase/poster_on_wall.png",
-      alt: "Framed minimal compass poster centered on Brighton, hung on a wall above a green armchair",
+      alt: "Framed minimal compass print centered on Brighton, hung on a wall above a green armchair",
     },
   },
 
@@ -81,40 +81,40 @@ export const copy = {
         title: "Vintage cartography",
         body: "Aged paper, hand-set serif labels, a compass rose. The classic look for a hallway.",
         media: {
-          label: "Poster style — vintage-cartography",
+          label: "Style — vintage cartography",
           aspect: "2 / 3",
           src: "/showcase/feature-vintage.png",
-          alt: "Vintage cartography poster centered on Rome",
+          alt: "Vintage cartography print centered on Rome",
         },
       },
       {
         title: "Minimal compass",
         body: "Clean lines, generous space, one accent. For modern rooms.",
         media: {
-          label: "Poster style — minimal-compass",
+          label: "Style — minimal compass",
           aspect: "2 / 3",
           src: "/showcase/feature-minimal.png",
-          alt: "Minimal compass poster centered on Copenhagen",
+          alt: "Minimal compass print centered on Copenhagen",
         },
       },
       {
         title: "Bold modern",
         body: "Heavy geometric type and high contrast. A statement piece.",
         media: {
-          label: "Poster style — bold-modern",
+          label: "Style — bold modern",
           aspect: "2 / 3",
           src: "/showcase/feature-bold.png",
-          alt: "Bold modern poster centered on Los Angeles",
+          alt: "Bold modern print centered on Los Angeles",
         },
       },
       {
         title: "Night sky",
         body: "Deep ink background, places glowing like stars over a dark map.",
         media: {
-          label: "Poster style — night-sky",
+          label: "Style — night sky",
           aspect: "2 / 3",
           src: "/showcase/feature-night-sky.png",
-          alt: "Night sky poster centered on Reykjavik with places glowing like stars",
+          alt: "Night sky print centered on Reykjavik with places glowing like stars",
         },
       },
     ],
@@ -130,14 +130,14 @@ export const copy = {
         label: "Export formats — SVG + print-quality PNG",
         aspect: "2 / 3",
         src: "/showcase/exportcard-export-formats.png",
-        alt: "Bold modern poster centered on Amsterdam",
+        alt: "Bold modern print centered on Amsterdam",
       },
     },
   },
 
   howItWorks: {
     eyebrow: "How it works",
-    headline: "Three steps to a finished poster.",
+    headline: "Three steps to a finished print.",
     steps: [
       {
         title: "Set your home",
@@ -161,14 +161,14 @@ export const copy = {
     eyebrow: "How to read it",
     headline: "Home in the middle. Everywhere else, drawn true.",
     body: "Here's what you're looking at. Your home sits at the center. Every other place gets an arrow pointing in its real compass direction, with the great-circle distance — the actual shortest path across the globe — printed beside it. Search your own home town and watch every reading change.",
-    // Three short labels that decode a single poster for a first-time visitor.
+    // Three short labels that decode a single piece for a first-time visitor.
     annotations: [
       { term: "Home", def: "The center point. Everything is measured from here." },
       { term: "The arrow", def: "Points in that place's true compass bearing from home." },
       { term: "The number", def: "The real distance, as the crow flies." },
     ],
     tryLabel: "Try it — measure from your home town",
-    posterLabel: "The poster it makes",
+    posterLabel: "The print it makes",
     posterCta: "Make your own",
   },
 
@@ -177,40 +177,40 @@ export const copy = {
     headline: "A few we'd hang ourselves.",
     items: [
       {
-        label: "Example poster — a transatlantic family",
+        label: "Example — a transatlantic family",
         aspect: "2 / 3",
         src: "/showcase/showcase-transatlantic-family.png",
-        alt: "Sea-atlas poster of a transatlantic family, centered on London",
+        alt: "Sea-atlas print of a transatlantic family, centered on London",
       },
       {
-        label: "Example poster — a decade of moves",
+        label: "Example — a decade of moves",
         aspect: "2 / 3",
         src: "/showcase/showcase-decade-of-moves.png",
-        alt: "Topographic poster of a decade of moves, centered on Denver",
+        alt: "Topographic print of a decade of moves, centered on Denver",
       },
       {
-        label: "Example poster — student years abroad",
+        label: "Example — student years abroad",
         aspect: "2 / 3",
         src: "/showcase/showcase-student-years-abroad.png",
-        alt: "Blueprint poster of student years abroad, centered on Manchester",
+        alt: "Blueprint print of student years abroad, centered on Manchester",
       },
       {
-        label: "Example poster — coastal hometowns",
+        label: "Example — coastal hometowns",
         aspect: "2 / 3",
         src: "/showcase/showcase-coastal-hometowns.png",
-        alt: "Minimal compass poster of coastal hometowns, centered on Brighton",
+        alt: "Minimal compass print of coastal hometowns, centered on Brighton",
       },
       {
-        label: "Example poster — three continents",
+        label: "Example — three continents",
         aspect: "2 / 3",
         src: "/showcase/lady_holding_poster.png",
-        alt: "A person holding a framed night-sky poster centered on Singapore, spanning three continents",
+        alt: "A person holding a framed night-sky print centered on Singapore, spanning three continents",
       },
       {
-        label: "Example poster — one long road trip",
+        label: "Example — one long road trip",
         aspect: "2 / 3",
         src: "/showcase/showcase-one-long-road-trip.png",
-        alt: "Art deco poster of one long road trip, centered on Chicago",
+        alt: "Art deco print of one long road trip, centered on Chicago",
       },
     ],
   },
@@ -253,17 +253,17 @@ export const copy = {
       eyebrow: "FAQ",
       headline: "Everything you might want to know.",
       intro:
-        "Designing your poster, sizes and framing, shipping, and what happens if something isn't right — it's all here. Still stuck? Get in touch and we'll help.",
+        "Designing your print, sizes and framing, shipping, and what happens if something isn't right — it's all here. Still stuck? Get in touch and we'll help.",
       metaTitle: "FAQ — Pinprint",
       metaDescription:
-        "Answers about designing your Pinprint poster, sizes and framing, shipping and delivery, returns, and your account.",
+        "Answers about designing your Pinprint print, sizes and framing, shipping and delivery, returns, and your account.",
     },
     // The full FAQ, grouped by category. `featured: true` marks the questions
     // surfaced on the landing page (the biggest pre-purchase objections); they
     // flatten in group order into: how it works → sizes → delivery → damaged → account.
     groups: [
       {
-        title: "Designing your poster",
+        title: "Designing your print",
         items: [
           {
             q: "How are the arrows and distances worked out?",
@@ -289,8 +289,8 @@ export const copy = {
             featured: true,
           },
           {
-            q: "How are the posters made?",
-            a: "Each poster is printed to order on heavyweight matte poster paper and checked by hand before it ships. Nothing is mass-produced — your print is made the moment you order it.",
+            q: "How is each print made?",
+            a: "Every print is made to order and checked by hand before it ships. Nothing is mass-produced — your piece is printed the moment you order it.",
           },
           {
             q: "Can I get it framed?",
@@ -306,8 +306,8 @@ export const copy = {
         title: "Shipping & delivery",
         items: [
           {
-            q: "When will my poster arrive?",
-            a: "Most orders arrive within 5–10 business days. Your poster is printed and shipped within 2–3 business days, and you'll get a tracking link by email the moment it's on its way.",
+            q: "When will my print arrive?",
+            a: "Most orders arrive within 5–10 business days. Your print is made and shipped within 2–3 business days, and you'll get a tracking link by email the moment it's on its way.",
             featured: true,
           },
           {
@@ -320,13 +320,13 @@ export const copy = {
         title: "Returns & changes",
         items: [
           {
-            q: "What if my poster arrives damaged or there's a printing problem?",
-            a: "We'll make it right. If your poster turns up damaged, or there's a fault with the print, email us a quick photo and we'll send a free replacement or refund you — no need to post the original back.",
+            q: "What if my print arrives damaged or there's a fault?",
+            a: "We'll make it right. If your print arrives damaged, or there's a fault, email us a quick photo and we'll send a free replacement or refund you — no need to post the original back.",
             featured: true,
           },
           {
             q: "Can I return it if I change my mind?",
-            a: "Because every poster is made to order from your own design, we can't take change-of-mind returns. Preview your poster as much as you like before you buy — and if anything's wrong with what arrives, we'll always sort it out.",
+            a: "Because every piece is made to order from your own design, we can't take change-of-mind returns. Preview your print as much as you like before you buy — and if anything's wrong with what arrives, we'll always sort it out.",
           },
           {
             q: "Can I change my order or shipping address after I've paid?",
@@ -339,12 +339,12 @@ export const copy = {
         items: [
           {
             q: "Do I need an account to try it?",
-            a: "No. Build and preview your poster straight away. An account only matters when you want to save your work or export without a watermark.",
+            a: "No. Build and preview your piece straight away. An account only matters when you want to save your work or export without a watermark.",
             featured: true,
           },
           {
             q: "Is my location data private?",
-            a: "Your places are only ever used to render your poster — we don't sell them or share them with anyone.",
+            a: "Your places are only ever used to render your artwork — we don't sell them or share them with anyone.",
           },
         ],
       },
@@ -354,12 +354,12 @@ export const copy = {
   finalCta: {
     headline: "Put your places on the wall.",
     subhead:
-      "Build your first poster in a few minutes. Free to design — pay only when you print.",
+      "Design your first piece in a few minutes. Free to design — pay only when you print.",
     cta: PRIMARY_CTA,
   },
 
   footer: {
-    tagline: "Poster maps of the places that matter.",
+    tagline: "Fine art maps of the places that matter.",
     columns: [
       {
         title: "Product",
@@ -367,7 +367,7 @@ export const copy = {
           { label: "How it works", href: "/#how-it-works" },
           { label: "Styles", href: "/#features" },
           { label: "Examples", href: "/#showcase" },
-          { label: "Create a poster", href: STUDIO_HREF },
+          { label: "Create a print", href: STUDIO_HREF },
         ],
       },
       {

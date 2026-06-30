@@ -85,7 +85,7 @@ function trackingOf(row: OrderRow): OrderTracking | undefined {
 
 function summaryOf(row: OrderRow, items: ItemRow[]): OrderSummary {
   const itemCount = items.reduce((n, it) => n + it.quantity, 0);
-  const first = items[0]?.product_label ?? "Poster";
+  const first = items[0]?.product_label ?? "Fine art print";
   const distinct = items.length;
   const previewLabel = distinct > 1 ? `${first} + ${distinct - 1} more` : first;
   return {

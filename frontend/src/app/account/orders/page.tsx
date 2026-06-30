@@ -13,7 +13,7 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <SectionHeading title="Orders" description="Every poster you've ordered." />
+      <SectionHeading title="Orders" description="Every print you've ordered." />
 
       {loading ? <Loading rows={4} /> : null}
       {error ? <ErrorState error={error} onRetry={reload} /> : null}
@@ -21,7 +21,7 @@ export default function OrdersPage() {
         <EmptyState>
           You haven&apos;t placed any orders yet.{" "}
           <Link href="/studio" className="text-ink underline">
-            Make a poster
+            Create a print
           </Link>
           .
         </EmptyState>

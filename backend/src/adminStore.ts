@@ -76,7 +76,7 @@ export async function adminListOrders(filters: AdminOrderFilters): Promise<Admin
           Number(r.tax_cents ?? 0)
         : null;
     const itemCount = Number(r.item_count ?? 0);
-    const firstLabel = (r.first_label as string) ?? "Poster";
+    const firstLabel = (r.first_label as string) ?? "Fine art print";
     return {
       id: r.id as string,
       orderNumber: r.order_number as string,

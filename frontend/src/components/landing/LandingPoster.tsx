@@ -99,7 +99,7 @@ export function LandingPoster({
     >
       <Image
         src={ROOM_SRC}
-        alt="A framed Pinprint poster on the wall of a styled living room"
+        alt="A framed Pinprint piece on the wall of a styled living room"
         width={ROOM_W}
         height={ROOM_H}
         className="absolute inset-0 h-full w-full object-cover"

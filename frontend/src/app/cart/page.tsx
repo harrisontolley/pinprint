@@ -141,11 +141,11 @@ export default function CartPage() {
           <Card className="mt-6 p-8 text-center">
             <p className="text-body">Your cart is empty.</p>
             <p className="mt-1 text-sm text-muted">
-              Design a poster of the places that matter, then add it here.
+              Design your piece of the places that matter, then add it here.
             </p>
             <div className="mt-5 flex justify-center">
               <Link href="/studio">
-                <Button variant="primary">Create your poster</Button>
+                <Button variant="primary">Create your print</Button>
               </Link>
             </div>
           </Card>

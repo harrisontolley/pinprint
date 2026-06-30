@@ -55,7 +55,7 @@ export function BuyBar({
   const subtitle =
     format === "digital"
       ? "High-resolution digital download"
-      : `Museum-grade print · digital file included${addFrame ? " · framed" : ""}`;
+      : `Fine art print · digital file included${addFrame ? " · framed" : ""}`;
 
   return (
     <div

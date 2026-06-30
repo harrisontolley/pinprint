@@ -5,9 +5,9 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pinprint — poster maps of the places that matter",
+  title: "Pinprint — fine art maps of the places that matter",
   description:
-    "Turn the places you have ties to into a poster: arrows pointing in each place's true compass direction from home, labeled with the great-circle distance.",
+    "Turn the places you're tied to into a custom fine art print — an arrow to each one in its true compass direction from home, with the real distance beside it. Designed by you, made to order.",
 };
 
 export default function RootLayout({

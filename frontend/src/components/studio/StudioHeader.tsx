@@ -61,7 +61,7 @@ export function StudioHeader({ className = "" }: { className?: string }) {
             <h1 className="font-display text-2xl leading-none text-ink">Pinprint</h1>
           </Link>
           <span className="hidden text-sm text-muted sm:inline">
-            poster maps of the places that matter
+            fine art maps of the places that matter
           </span>
         </div>
         <div className="flex items-center gap-2">

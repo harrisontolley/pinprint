@@ -63,7 +63,7 @@ describe("selectionLineItems", () => {
       addFrame: false,
     });
     expect(items.map((i) => i.label)).toEqual([
-      `${product.label} print`,
+      `${product.label} fine art print`,
       "Digital download",
     ]);
     expect(items.at(-1)).toEqual({ label: "Digital download", cents: 0 });

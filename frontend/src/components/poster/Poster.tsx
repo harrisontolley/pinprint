@@ -115,7 +115,7 @@ export function Poster({
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label={
-        home ? `Poster of places radiating from ${home.label}` : "Empty poster"
+        home ? `Map of places radiating from ${home.label}` : "Empty map"
       }
     >
       <PaperBackground t={t} width={width} height={height} idp={idPrefix} />

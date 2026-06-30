@@ -156,7 +156,7 @@ export function PosterStudio() {
   async function handleDownload(kind: "svg" | "png") {
     const svg = getSvg();
     if (!svg) return;
-    const name = `pinprint-${slugify(home?.label ?? "poster")}.${kind}`;
+    const name = `pinprint-${slugify(home?.label ?? "print")}.${kind}`;
     setExporting(kind);
     try {
       if (kind === "svg") await exportSvg(svg, name);
