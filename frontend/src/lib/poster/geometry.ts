@@ -22,6 +22,31 @@ export type PosterGeometry = {
   maxRadius: number;
 };
 
+/** The rectangle labels must stay inside: poster margins on the left/top/right,
+ * and the reserved bottom band (title / coords / legend / footer) on the bottom.
+ * This is the bound the collision engine clamps label boxes to — using the band
+ * top (`height - BOTTOM_BAND`) rather than `height - margin` so labels never sit
+ * over the bottom text block. */
+export type ContentSafeRect = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+};
+
+export function contentSafeRect(
+  width: number,
+  height: number,
+  margin: number = POSTER_MARGIN,
+): ContentSafeRect {
+  return {
+    minX: margin,
+    minY: margin,
+    maxX: width - margin,
+    maxY: height - BOTTOM_BAND,
+  };
+}
+
 export function posterGeometry(width: number, height: number): PosterGeometry {
   const cx = width / 2;
   const bandTop = height - BOTTOM_BAND;

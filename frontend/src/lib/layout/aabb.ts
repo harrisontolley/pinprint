@@ -15,6 +15,35 @@ export function rectsOverlap(a: Rect, b: Rect, pad = 0): boolean {
 }
 
 /**
+ * Minimum translation vector that pushes `a` off `b`, or `null` if they don't
+ * overlap (with `pad` required as a gap between them — same convention as
+ * `rectsOverlap`). The vector lies on the axis of *smaller* penetration so the
+ * label moves the shortest distance to clear; an equal-penetration tie resolves
+ * on the y axis (a 1000×1500 poster is taller than wide, so vertical room is
+ * cheaper). Applying `mtv(a, b)` to `a`'s position makes `rectsOverlap(a, b, pad)`
+ * false. Antisymmetric for distinct centers: `mtv(a, b) === -mtv(b, a)`.
+ */
+export function mtv(a: Rect, b: Rect, pad = 0): Point | null {
+  const aCx = a.x + a.w / 2;
+  const aCy = a.y + a.h / 2;
+  const bCx = b.x + b.w / 2;
+  const bCy = b.y + b.h / 2;
+  const dx = aCx - bCx;
+  const dy = aCy - bCy;
+  // Penetration on each axis: how far inside the required (half + pad) span the
+  // centers sit. ≤ 0 means a gap of at least `pad` already exists on that axis.
+  const px = a.w / 2 + b.w / 2 + pad - Math.abs(dx);
+  const py = a.h / 2 + b.h / 2 + pad - Math.abs(dy);
+  if (px <= 0 || py <= 0) return null;
+
+  // Resolve on the smaller-penetration axis; tie (px === py) falls to y.
+  if (px < py) {
+    return { x: (dx >= 0 ? 1 : -1) * px, y: 0 };
+  }
+  return { x: 0, y: (dy >= 0 ? 1 : -1) * py };
+}
+
+/**
  * Does the segment p1→p2 touch the rectangle (expanded by `pad`)? Liang–Barsky
  * parametric clip: keep the slice of the segment inside each of the four padded
  * edges; the segment hits the box iff a non-empty slice survives. A zero-length

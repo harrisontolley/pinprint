@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { BearingMode, Place, Units } from "@/lib/types";
 import type { TemplateSpec } from "@/lib/templates/types";
-import type { LaidOut } from "@/lib/layout/types";
+import type { LaidOut, LayoutConfig } from "@/lib/layout/types";
 import { computePlaces } from "@/lib/geo";
 import { computeLayout, defaultLayoutConfig } from "@/lib/layout";
 import { createMeasurer } from "@/components/poster/measure";
@@ -25,6 +25,12 @@ export function useMeasuredLayout(opts: {
   scaleByDistance: boolean;
   /** Mirrors the render toggle so hidden-distance labels are sized to one line. */
   showDistances?: boolean;
+  /**
+   * Optional layout-config overrides, merged on top of the defaults. Used by the
+   * tuning lab to drive the collision engine from sliders; production passes none.
+   * Pass a stable (memoized) object — it's a `useMemo` dependency.
+   */
+  configOverrides?: Partial<LayoutConfig>;
 }): LaidOut[] {
   const {
     home,
@@ -37,16 +43,18 @@ export function useMeasuredLayout(opts: {
     bearingMode,
     scaleByDistance,
     showDistances = true,
+    configOverrides,
   } = opts;
 
   return useMemo(() => {
     if (!home) return [];
     const computed = computePlaces(home, places, { mode: bearingMode });
-    // Push the label past the arrowhead (which extends back from the tip) so the
-    // inner text line / icon never sits under it — biggest on bold solid heads.
+    // The legacy `labelGap` (used when iconAtTip is off) pushes the label past the
+    // arrowhead; with the default icon-at-tip mode `tipIconGap` governs instead.
     const cfg = defaultLayoutConfig(width, height, {
       scaleByDistance,
       labelGap: 16 + Math.round(template.arrowheadSize * 1.5),
+      ...configOverrides,
     });
     const measure = createMeasurer(template, units, showDistances);
     return computeLayout(computed, cfg, measure);
@@ -63,5 +71,6 @@ export function useMeasuredLayout(opts: {
     bearingMode,
     scaleByDistance,
     showDistances,
+    configOverrides,
   ]);
 }
