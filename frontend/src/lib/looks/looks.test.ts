@@ -52,9 +52,6 @@ describe("activeLookId", () => {
   });
 
   it("returns null when the selection lives only under Advanced", () => {
-    // Non-featured templates.
-    expect(activeLookId("art-deco", "classic")).toBeNull();
-    expect(activeLookId("constellation", "classic")).toBeNull();
     // A non-classic vintage variant is off the featured rails.
     expect(activeLookId("vintage-cartography", "explorer")).toBeNull();
     expect(activeLookId("vintage-cartography", "atlas")).toBeNull();

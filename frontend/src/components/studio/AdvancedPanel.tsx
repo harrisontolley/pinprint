@@ -1,7 +1,7 @@
 "use client";
 
 import { usePosterStore } from "@/lib/store/posterStore";
-import { getActiveTemplate, TEMPLATES } from "@/lib/templates/registry";
+import { getActiveTemplate } from "@/lib/templates/registry";
 import {
   VINTAGE_VARIANT_ORDER,
   VINTAGE_VARIANT_LABELS,
@@ -15,7 +15,7 @@ import { FONT_PRESETS } from "@/lib/templates/fontPresets";
 import { AFFILIATIONS, AFFILIATION_ORDER } from "@/lib/affiliations";
 import type { Customization } from "@/lib/templates/customize";
 import type { Affiliation } from "@/lib/types";
-import type { RoseStyle, TemplateId } from "@/lib/templates/types";
+import type { RoseStyle } from "@/lib/templates/types";
 import { PillButton } from "@/components/ui/PillButton";
 import { Button } from "@/components/ui/Button";
 import { DisclosureSection } from "@/components/ui/DisclosureSection";
@@ -209,12 +209,8 @@ const ROSE_OPTIONS: { id: RoseStyle; label: string; title: string }[] = [
   { id: "deco", label: "Deco", title: "Art-deco stepped sunburst" },
 ];
 
-/** The two styles not surfaced as featured looks (live under "More styles"). */
-const MORE_STYLES: TemplateId[] = ["art-deco", "constellation"];
-
 export function AdvancedPanel() {
   const templateId = usePosterStore((s) => s.templateId);
-  const setTemplate = usePosterStore((s) => s.setTemplate);
   const vintageVariant = usePosterStore((s) => s.vintageVariant);
   const setVintageVariant = usePosterStore((s) => s.setVintageVariant);
   const home = usePosterStore((s) => s.home);
@@ -502,25 +498,10 @@ export function AdvancedPanel() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <Heading>More styles</Heading>
-            <div className="flex flex-wrap gap-1.5">
-              {MORE_STYLES.map((id) => (
-                <PillButton
-                  key={id}
-                  size="sm"
-                  active={templateId === id}
-                  onClick={() => setTemplate(id)}
-                >
-                  {TEMPLATES[id].name}
-                </PillButton>
-              ))}
-            </div>
-            {templateId === "vintage-cartography" && (
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-[11px] uppercase tracking-[0.09em] text-muted">
-                  Variant
-                </span>
+          {templateId === "vintage-cartography" && (
+            <section className="flex flex-col gap-2">
+              <Heading>Heirloom variant</Heading>
+              <div className="flex flex-wrap items-center gap-1.5">
                 {VINTAGE_VARIANT_ORDER.map((v) => (
                   <PillButton
                     key={v}
@@ -532,8 +513,8 @@ export function AdvancedPanel() {
                   </PillButton>
                 ))}
               </div>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       </DisclosureSection>
 

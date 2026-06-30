@@ -7,8 +7,7 @@
 // Selecting a look goes through the store's applyLook(), which sets the template
 // + variant and clears customization so one look's overrides never bleed into the
 // next. activeLookId() maps current store state back to a look (or null when the
-// user has gone "off the rails" into Advanced — art-deco, constellation, or a
-// non-classic vintage variant).
+// user has gone "off the rails" into Advanced — a non-classic vintage variant).
 
 import type { TemplateId, VintageVariant } from "../templates/types";
 
@@ -106,8 +105,8 @@ export const DEFAULT_LOOK_ID: LookId = "warm-minimal";
 
 /**
  * Which featured look matches the current template + vintage variant, or null
- * when the selection lives only under Advanced (art-deco, constellation, or a
- * non-classic vintage variant). Lets the look cards show the right active state.
+ * when a non-classic vintage variant is active (off the featured rails, under
+ * Advanced). Lets the look cards show the right active state.
  */
 export function activeLookId(
   templateId: TemplateId,

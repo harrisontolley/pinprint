@@ -7,9 +7,9 @@ import { snapshotPosterConfig, snapshotSummary } from "./posterConfig";
 
 describe("snapshotPosterConfig", () => {
   it("captures the current studio design", () => {
-    usePosterStore.setState({ templateId: "art-deco", productId: "portrait-24x36", format: "print", addFrame: true });
+    usePosterStore.setState({ templateId: "bold-modern", productId: "portrait-24x36", format: "print", addFrame: true });
     const snap = snapshotPosterConfig();
-    expect(snap.templateId).toBe("art-deco");
+    expect(snap.templateId).toBe("bold-modern");
     expect(snap.productId).toBe("portrait-24x36");
     expect(snap.addFrame).toBe(true);
   });

@@ -10,9 +10,7 @@ export type TemplateId =
   | "bold-modern"
   | "night-sky"
   | "blueprint"
-  | "art-deco"
-  | "topographic"
-  | "constellation";
+  | "topographic";
 
 /** Sub-styles of the hero vintage template (chosen via in-app toggle). */
 export type VintageVariant = "classic" | "explorer" | "atlas";
@@ -63,10 +61,6 @@ export type TemplateSpec = {
   homeGlow: boolean;
   /** Full-bleed background motif (blueprint grid / topographic contours). */
   backdrop?: BackdropStyle;
-  /** Stepped flourishes inside the four border corners (art-deco). */
-  cornerOrnament?: "deco";
-  /** Faint lines + star dots linking the places, like a star chart. */
-  constellationLines?: boolean;
 
   // ---- Fonts (CSS families, usually a var()) ----
   titleFamily: string;

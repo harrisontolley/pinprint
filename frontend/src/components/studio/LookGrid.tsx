@@ -5,10 +5,10 @@ import { LOOKS, activeLookId } from "@/lib/looks/looks";
 import { LookCard } from "./LookCard";
 
 /**
- * The six featured looks. Selecting one applies its template + variant and
- * resets customization (store.applyLook). When the user picks a non-featured
- * style under Advanced (art-deco, constellation, a non-classic vintage variant),
- * activeLookId is null and no card shows active — which is correct.
+ * The featured looks. Selecting one applies its template + variant and resets
+ * customization (store.applyLook). When the user picks a non-classic vintage
+ * variant under Advanced, activeLookId is null and no card shows active — which
+ * is correct.
  */
 export function LookGrid() {
   const templateId = usePosterStore((s) => s.templateId);

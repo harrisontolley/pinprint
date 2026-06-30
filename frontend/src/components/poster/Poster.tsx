@@ -54,71 +54,6 @@ function NorthIndicator({
   );
 }
 
-/** Faint lines + star dots linking the places, like a star chart (constellation). */
-function ConstellationLines({
-  items,
-  color,
-}: {
-  items: LaidOut[];
-  color: string;
-}) {
-  // Connect tips in bearing order so the path traces a clean arc around home.
-  const sorted = [...items].sort((a, b) => a.bearingDeg - b.bearingDeg);
-  const d = sorted
-    .map((it, i) => `${i === 0 ? "M" : "L"} ${it.tip.x} ${it.tip.y}`)
-    .join(" ");
-  return (
-    <g>
-      <path
-        d={d}
-        fill="none"
-        stroke={color}
-        strokeOpacity={0.28}
-        strokeWidth={1}
-        strokeDasharray="2 6"
-      />
-      {items.map((it) => (
-        <circle key={`star-${it.id}`} cx={it.tip.x} cy={it.tip.y} r={2.6} fill={color} />
-      ))}
-    </g>
-  );
-}
-
-/** Stepped flourishes inside the four border corners (art-deco). */
-function DecoCorners({
-  width,
-  height,
-  margin,
-  color,
-}: {
-  width: number;
-  height: number;
-  margin: number;
-  color: string;
-}) {
-  const inset = margin + 16;
-  const arm = 34;
-  const corners = [
-    { x: inset, y: inset, sx: 1, sy: 1 },
-    { x: width - inset, y: inset, sx: -1, sy: 1 },
-    { x: inset, y: height - inset, sx: 1, sy: -1 },
-    { x: width - inset, y: height - inset, sx: -1, sy: -1 },
-  ];
-  return (
-    <g stroke={color} strokeWidth={1.4} fill="none">
-      {corners.map(({ x, y, sx, sy }, i) => (
-        <path
-          key={i}
-          d={
-            `M ${x} ${y + sy * arm} L ${x} ${y} L ${x + sx * arm} ${y} ` +
-            `M ${x + sx * 10} ${y + sy * 10} L ${x + sx * 24} ${y + sy * 10} L ${x + sx * 24} ${y + sy * 24}`
-          }
-        />
-      ))}
-    </g>
-  );
-}
-
 export type PosterProps = {
   home: Place | null;
   items: LaidOut[];
@@ -198,10 +133,6 @@ export function Poster({
       <CompassRose t={t} cx={cx} cy={cy} />
       {t.homeGlow && (
         <circle cx={cx} cy={cy} r={130} fill={`url(#${idPrefix}-glow)`} />
-      )}
-
-      {t.constellationLines && items.length > 1 && (
-        <ConstellationLines items={items} color={t.accent} />
       )}
 
       {/* Spokes first, then labels so text paints above the lines. */}
@@ -323,14 +254,6 @@ export function Poster({
               width={width - 2 * (margin + 9)}
               height={height - 2 * (margin + 9)}
               strokeWidth={1}
-            />
-          )}
-          {t.cornerOrnament === "deco" && (
-            <DecoCorners
-              width={width}
-              height={height}
-              margin={margin}
-              color={t.border}
             />
           )}
         </g>

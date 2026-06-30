@@ -3,8 +3,7 @@ import type { TemplateSpec } from "./types";
 /**
  * Night sky — a cool observatory starfield. Deep cool navy, radiating starburst,
  * faint dotted rings, a soft glow at center, thin steel-blue arrows and cool
- * starlight serif names. Cooler than the warm-gold Celestial; no constellation
- * lines (that stays Constellation's identity).
+ * starlight serif names. Cooler than the warm-gold Celestial.
  */
 export const nightSky: TemplateSpec = {
   id: "night-sky",

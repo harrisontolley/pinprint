@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Affiliation, BearingMode, GeoResult, Place, Units } from "../types";
 import type { TemplateId, VintageVariant } from "../templates/types";
-import { DEFAULT_TEMPLATE_ID } from "../templates/registry";
+import { DEFAULT_TEMPLATE_ID, TEMPLATES } from "../templates/registry";
 import {
   DEFAULT_POSTER_SIZE_ID,
   type PosterSizeId,
@@ -202,6 +202,11 @@ export const usePosterStore = create<PosterState>()(
         return {
           ...current,
           ...p,
+          // A draft saved against a since-removed template falls back to default.
+          templateId:
+            p.templateId && p.templateId in TEMPLATES
+              ? p.templateId
+              : current.templateId,
           // Backfill any customization keys added since the draft was saved.
           customization: { ...DEFAULT_CUSTOMIZATION, ...(p.customization ?? {}) },
         };

@@ -8,9 +8,7 @@ import { minimal } from "./minimal";
 import { bold } from "./bold";
 import { nightSky } from "./nightSky";
 import { blueprint } from "./blueprint";
-import { artDeco } from "./artDeco";
 import { topographic } from "./topographic";
-import { constellation } from "./constellation";
 import { VINTAGE_VARIANTS } from "./vintageVariants";
 
 export const TEMPLATES: Record<TemplateId, TemplateSpec> = {
@@ -23,9 +21,7 @@ export const TEMPLATES: Record<TemplateId, TemplateSpec> = {
   "bold-modern": bold,
   "night-sky": nightSky,
   blueprint,
-  "art-deco": artDeco,
   topographic,
-  constellation,
 };
 
 /** Display order in the switcher — trend looks first, then the originals. */
@@ -39,9 +35,7 @@ export const TEMPLATE_ORDER: TemplateId[] = [
   "bold-modern",
   "night-sky",
   "blueprint",
-  "art-deco",
   "topographic",
-  "constellation",
 ];
 
 export const DEFAULT_TEMPLATE_ID: TemplateId = "warm-minimal";
