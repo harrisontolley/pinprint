@@ -1,6 +1,7 @@
 "use client";
 
 import { usePosterStore } from "@/lib/store/posterStore";
+import { Button } from "@/components/ui/Button";
 import { formatUsd, discountPercent } from "@/lib/commerce/price";
 import {
   DIGITAL_PRICE_CENTS,
@@ -36,13 +37,14 @@ export function DigitalOption() {
         <span className="text-xs text-muted">
           Print-ready high-resolution file. Yours to print anywhere.
         </span>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setFormat("print")}
-          className="mt-1 self-start text-xs text-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
+          className="mt-2 self-start"
         >
-          ← Back to prints
-        </button>
+          ← Back to print sizes
+        </Button>
       </div>
     );
   }
