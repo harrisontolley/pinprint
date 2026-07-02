@@ -31,8 +31,13 @@ function measureWidth(text: string, font: string, letterSpacing: number): number
   const c = getCtx();
   if (!c) {
     // SSR / no-canvas fallback: rough estimate keeps layout sane until the
-    // client re-measures with real metrics.
-    return text.length * 9 + Math.max(0, text.length - 1) * letterSpacing;
+    // client re-measures with real metrics. Must scale with font size (not
+    // just letter-spacing) so size-fitting logic (e.g. fitTitleFontSize)
+    // still behaves without a canvas.
+    const sizeMatch = font.match(/(\d+(?:\.\d+)?)px/);
+    const size = sizeMatch ? parseFloat(sizeMatch[1]) : 16;
+    const avgCharWidth = size * 0.5625; // ~9px at a 16px reference size
+    return text.length * avgCharWidth + Math.max(0, text.length - 1) * letterSpacing;
   }
   c.font = font;
   const withLs = c as CanvasRenderingContext2D & { letterSpacing?: string };
@@ -48,6 +53,43 @@ function measureWidth(text: string, font: string, letterSpacing: number): number
   const w = c.measureText(text).width;
   // If the browser ignores ctx.letterSpacing, add it manually.
   return lsApplied ? w : w + Math.max(0, text.length - 1) * letterSpacing;
+}
+
+const MIN_TITLE_SIZE = 28;
+
+/**
+ * Largest font size (<= baseSize, >= MIN_TITLE_SIZE) at which `text` fits
+ * within `maxWidth`, measured to exactly mirror how Poster.tsx renders the
+ * title: fixed (unscaled) letter-spacing, small-caps variant when requested,
+ * plus one trailing letter-spacing gap (SVG adds this after the last glyph,
+ * and textAnchor="middle" centers the full advance including it).
+ */
+export function fitTitleFontSize(
+  text: string,
+  baseSize: number,
+  family: string,
+  weight: number,
+  letterSpacing: number,
+  maxWidth: number,
+  smallCaps = false,
+): number {
+  if (!text) return baseSize;
+  const resolvedFamily = resolveFamily(family);
+  const variant = smallCaps ? "small-caps " : "";
+  const widthAt = (size: number) =>
+    measureWidth(text, `${variant}${weight} ${size}px ${resolvedFamily}`, letterSpacing) +
+    letterSpacing;
+  if (widthAt(baseSize) <= maxWidth) return baseSize;
+  if (widthAt(MIN_TITLE_SIZE) >= maxWidth) return MIN_TITLE_SIZE;
+
+  let lo = MIN_TITLE_SIZE;
+  let hi = baseSize;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (widthAt(mid) <= maxWidth) lo = mid;
+    else hi = mid;
+  }
+  return Math.floor(lo);
 }
 
 /**

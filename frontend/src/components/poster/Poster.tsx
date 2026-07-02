@@ -8,9 +8,11 @@ import { CompassRose } from "./CompassRose";
 import { Arrow } from "./Arrow";
 import { PlaceLabel } from "./PlaceLabel";
 import { Legend } from "./Legend";
+import { fitTitleFontSize } from "./measure";
 
 export const POSTER_W = 1000;
 export const POSTER_H = 1500;
+const TITLE_SAFE_INSET = 96; // px from each page edge; symmetric border-free zone for the title
 
 const DEFAULT_DISPLAY: DisplayOptions = {
   legend: true,
@@ -105,6 +107,19 @@ export function Poster({
         : "";
   const footerStr = footer && footer.trim() ? footer.trim() : "PINPRINT";
 
+  const titleMaxWidth = width - 2 * TITLE_SAFE_INSET;
+  const fittedTitleSize = home
+    ? fitTitleFontSize(
+        displayedTitle,
+        t.titleSize,
+        t.titleFamily,
+        t.titleWeight,
+        t.titleLetterSpacing,
+        titleMaxWidth,
+        t.nameTransform === "smallcaps",
+      )
+    : t.titleSize;
+
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
@@ -191,7 +206,7 @@ export function Poster({
             x={cx}
             y={height - 286}
             fontFamily={t.titleFamily}
-            fontSize={t.titleSize}
+            fontSize={fittedTitleSize}
             fontWeight={t.titleWeight}
             fill={t.ink}
             style={{
