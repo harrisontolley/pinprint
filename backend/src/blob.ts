@@ -1,4 +1,4 @@
-import { del, issueSignedToken, list, presignUrl } from "@vercel/blob";
+import { del, issueSignedToken, list, presignUrl, put } from "@vercel/blob";
 
 // Vercel Blob helpers for the print-asset lifecycle. Env-guarded like the rest of
 // the integration clients (db.ts / artelo.ts): every function degrades gracefully
@@ -74,6 +74,33 @@ export async function signAssetUrl(url: string, opts: { ttlMs?: number } = {}): 
   } catch (err) {
     console.error("[blob] signAssetUrl failed", err);
     return url;
+  }
+}
+
+/**
+ * Server-side upload of a print-ready PNG as a *private* blob (posters encode
+ * personal locations). Used by the fulfilment-time renderer (renderPrint.ts) —
+ * the browser client-uploads its own PNG/SVG, but the exact-DPI print render is
+ * produced and stored here. Stays under the posters/ prefix so the existing blob
+ * GC treats it exactly like the client PNG. Returns null when unconfigured or on
+ * error (the caller then falls back to the client PNG). `allowOverwrite` makes a
+ * re-render for the same order idempotent at the storage layer.
+ */
+export async function putPrivatePng(pathname: string, png: Buffer): Promise<string | null> {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return null;
+  try {
+    const { url } = await put(pathname, png, {
+      token,
+      access: "private",
+      contentType: "image/png",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+    return url;
+  } catch (err) {
+    console.error("[blob] putPrivatePng failed", err);
+    return null;
   }
 }
 
