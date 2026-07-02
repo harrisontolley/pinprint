@@ -1,33 +1,39 @@
 import { SiteHeader } from "./SiteHeader";
 import { Hero } from "./Hero";
-import { SocialProofBar } from "./SocialProofBar";
-import { Problem } from "./Problem";
-import { Features } from "./Features";
+import { TrustLine } from "./TrustLine";
 import { HowItWorks } from "./HowItWorks";
 import { GlobeDemo } from "./GlobeDemo";
-import { Showcase } from "./Showcase";
-import { Testimonials } from "./Testimonials";
+import { CraftSection } from "./CraftSection";
+import { StyleGallery } from "./StyleGallery";
+import { Stories } from "./Stories";
+import { PricingPreview } from "./PricingPreview";
 import { FAQ } from "./FAQ";
 import { FinalCTA } from "./FinalCTA";
 import { SiteFooter } from "./SiteFooter";
 
 /**
- * Marketing landing page for Pinprint. Server-rendered; the only interactive
- * piece (the FAQ) uses native <details>. Every CTA links to the tool at /studio.
- * All copy lives in copy.ts and all media are labeled MediaPlaceholder frames.
+ * Marketing landing page for Pinprint. Server-rendered; the interactive pieces
+ * (the globe demo and FAQ's native <details>) are client islands. Every CTA
+ * links to the studio. All copy lives in copy.ts; all imagery is real engine
+ * renders or composited lifestyle scenes (scripts/compose-scenes.ts).
+ *
+ * Order: emotional hook (Hero) → quality facts (TrustLine) → mechanics
+ * (HowItWorks) → authority (GlobeDemo: the accuracy story with the live globe)
+ * → materials (Craft) → range (StyleGallery) → outcomes (Stories) → price →
+ * objections (FAQ) → close (FinalCTA).
  */
 export function LandingPage() {
   return (
     <main className="bg-canvas text-body">
       <SiteHeader />
       <Hero />
-      <SocialProofBar />
-      <GlobeDemo />
-      <Problem />
-      <Features />
+      <TrustLine />
       <HowItWorks />
-      <Showcase />
-      <Testimonials />
+      <GlobeDemo />
+      <CraftSection />
+      <StyleGallery />
+      <Stories />
+      <PricingPreview />
       <FAQ />
       <FinalCTA />
       <SiteFooter />

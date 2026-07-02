@@ -32,7 +32,7 @@ const GlobeScene = dynamic(() => import("./GlobeScene"), {
  * every reading live. Lazily mounted and fully static under prefers-reduced-motion.
  */
 export function GlobeDemo() {
-  const { globe } = copy;
+  const { accuracy } = copy;
   const wrapRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [inView, setInView] = useState(false);
@@ -95,21 +95,26 @@ export function GlobeDemo() {
   const ready = inView && size.width > 0 && size.height > 0;
 
   return (
-    <Section id="globe">
+    <Section id="accuracy">
       {/* Intro + the live "try it from your home" search. */}
       <div className="flex max-w-2xl flex-col items-start gap-4">
-        <SectionLabel>{globe.eyebrow}</SectionLabel>
-        <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.17] tracking-[-0.36px] text-ink">
-          {globe.headline}
+        <SectionLabel>{accuracy.eyebrow}</SectionLabel>
+        <h2 className="font-display text-[clamp(1.75rem,4vw,36px)] font-normal leading-[1.15] tracking-[-0.01em] text-ink">
+          {accuracy.headline}
         </h2>
-        <p className="text-[16px] leading-[1.5] tracking-[0.16px] text-body">
-          {globe.body}
-        </p>
+        {accuracy.body.map((para, i) => (
+          <p
+            key={i}
+            className="text-[16px] leading-[1.55] tracking-[0.16px] text-body"
+          >
+            {para}
+          </p>
+        ))}
 
         <dl className="mt-2 flex flex-col gap-3">
-          {globe.annotations.map((a) => (
+          {accuracy.annotations.map((a) => (
             <div key={a.term} className="flex items-baseline gap-3">
-              <dt className="min-w-[5.5rem] shrink-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
+              <dt className="min-w-[5.5rem] shrink-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-accent-deep">
                 {a.term}
               </dt>
               <dd className="text-[15px] leading-[1.47] text-body">{a.def}</dd>
@@ -117,9 +122,13 @@ export function GlobeDemo() {
           ))}
         </dl>
 
+        <p className="mt-2 max-w-[56ch] border-l-2 border-accent pl-4 text-[15px] leading-[1.55] text-body">
+          {accuracy.fidelity}
+        </p>
+
         <div className="mt-2 w-full max-w-sm">
           <p className="mb-1.5 text-[13px] font-medium text-body-strong">
-            {globe.tryLabel}
+            {accuracy.tryLabel}
           </p>
           <PlaceSearch
             onSelect={handleSelectHome}
@@ -171,14 +180,14 @@ export function GlobeDemo() {
 
         <div className="mx-auto flex w-full max-w-[520px] flex-col items-center gap-3">
           <p className="self-start text-[13px] font-medium uppercase tracking-[0.08em] text-muted">
-            {globe.posterLabel}
+            {accuracy.posterLabel}
           </p>
           <LandingPoster home={home} places={GLOBE_DEMO_PLACES} />
           <Link
             href={STUDIO_HREF}
             className="text-[14px] font-medium text-ink underline underline-offset-4 transition-colors hover:text-body"
           >
-            {globe.posterCta} →
+            {accuracy.posterCta} →
           </Link>
         </div>
       </div>

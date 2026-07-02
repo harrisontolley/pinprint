@@ -13,7 +13,7 @@
  * Run AFTER `render:posters` (it consumes public/showcase/<poster>.png).
  * On-demand asset generation — NOT part of `next build` or CI.
  */
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -41,7 +41,7 @@ const SCENES: Composite[] = [
  * solid black run BOTH horizontally and vertically — true only inside a large
  * filled rectangle.
  */
-async function findBlackRect(img: sharp.Sharp) {
+async function findBlackRect(img: Sharp) {
   const { data, info } = await img
     .clone()
     .raw()
@@ -115,7 +115,7 @@ async function composeOne({ out, scene, poster }: Composite) {
   const scenePath = path.join(SCENES_DIR, scene);
   const base = sharp(await readFile(scenePath));
 
-  let composed: sharp.Sharp;
+  let composed: Sharp;
   if (poster) {
     const rect = await findBlackRect(base);
     const posterBuf = await sharp(path.join(OUT_DIR, `${poster}.png`))

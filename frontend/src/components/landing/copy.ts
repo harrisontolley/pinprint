@@ -1,11 +1,11 @@
 /**
  * Single source of truth for ALL landing-page copy.
  *
- * Everything visible on `/` is authored here so it can be replaced in one place
- * before launch — no string hunting across components. All values are placeholder
- * marketing copy. Written to read like a person wrote it: short and long sentences
- * mixed, specifics over adjectives, no "not only… but also", no filler triads, no
- * buzzwords. Swap the words, keep the shape.
+ * Everything visible on `/` is authored here so it can be changed in one place.
+ * Voice (DESIGN.md): warm-gift premium. Short declaratives with periods.
+ * Specifics over adjectives. No em dashes, no exclamation marks, no emoji.
+ * Every claim here is verifiable: paper stock, ink type, bearing math, shipping
+ * policy. Nothing invented, no fabricated testimonials or press logos.
  */
 
 export const STUDIO_HREF = "/studio";
@@ -22,12 +22,11 @@ export const copy = {
   },
 
   nav: {
-    // Absolute hrefs (`/#section`) so the shared header works from any route,
-    // not just the landing page. FAQ points at the dedicated page.
+    // Absolute hrefs (`/#section`) so the shared header works from any route.
     links: [
       { label: "How it works", href: "/#how-it-works" },
-      { label: "Styles", href: "/#features" },
-      { label: "Examples", href: "/#showcase" },
+      { label: "Styles", href: "/#styles" },
+      { label: "Pricing", href: "/pricing" },
       { label: "FAQ", href: "/faq" },
     ],
   },
@@ -35,104 +34,31 @@ export const copy = {
   hero: {
     // Eyebrow names the category in plain words so a cold visitor knows what
     // this is before reading anything else.
-    eyebrow: "Custom fine art map",
-    // Emotional outcome in ≤12 words; the subhead carries the mechanic.
+    eyebrow: "Custom fine art map print",
     headline: "A map of everywhere that made you you.",
     subhead:
-      "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one in its true compass direction, with the real distance beside it — ready to frame and hang.",
+      "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one, pointing exactly where it really is, with the true distance beside it. Then we print it on gallery paper and send it to your door.",
     primaryCta: PRIMARY_CTA,
     secondaryCta: "See how it works",
-    // Small line under the CTAs — preserves the conversion value of the old
-    // pricing section (people need to know it costs nothing to start).
-    reassurance: "Free to design — pay only when you print.",
+    reassurance: "Free to design. Pay only when you print.",
     media: {
-      label: "Hero — a finished Pinprint print, framed and hung above a reading chair",
-      aspect: "16 / 9",
-      src: "/showcase/poster_on_wall.png",
-      alt: "Framed minimal compass print centered on Brighton, hung on a wall above a green armchair",
+      label: "A framed Pinprint hung above an oak sideboard",
+      aspect: "3 / 2",
+      src: "/showcase/scene-hero.png",
+      alt: "Framed warm-minimal Pinprint of San Francisco hanging on an ivory wall above an oak sideboard, next to a linen armchair",
     },
   },
 
-  socialProof: {
-    label: "Printed and framed by people in 40+ countries",
-    logos: [
-      "Press / partner logo 1",
-      "Press / partner logo 2",
-      "Press / partner logo 3",
-      "Press / partner logo 4",
-      "Press / partner logo 5",
-    ],
-  },
-
-  problem: {
-    eyebrow: "The problem",
-    headline: "Your places live in a list. They belong on a wall.",
-    body: [
-      "The towns you grew up in, the city you fell in love in, the country your family came from — they're scattered across old photos and your memory.",
-      "A pin map gets close, but the pins crowd together and the meaning gets lost. You want one frame that says where you've been and where home is, without the clutter.",
-    ],
-  },
-
-  features: {
-    eyebrow: "Pick a look",
-    headline: "Four styles. The same places, drawn true.",
+  // Thin hairline strip of verifiable quality signals. Replaces logo bars and
+  // star widgets: specifics are the trust currency (DESIGN.md).
+  trustLine: {
     items: [
-      {
-        title: "Vintage cartography",
-        body: "Aged paper, hand-set serif labels, a compass rose. The classic look for a hallway.",
-        media: {
-          label: "Style — vintage cartography",
-          aspect: "2 / 3",
-          src: "/showcase/feature-vintage.png",
-          alt: "Vintage cartography print centered on Rome",
-        },
-      },
-      {
-        title: "Minimal compass",
-        body: "Clean lines, generous space, one accent. For modern rooms.",
-        media: {
-          label: "Style — minimal compass",
-          aspect: "2 / 3",
-          src: "/showcase/feature-minimal.png",
-          alt: "Minimal compass print centered on Copenhagen",
-        },
-      },
-      {
-        title: "Bold modern",
-        body: "Heavy geometric type and high contrast. A statement piece.",
-        media: {
-          label: "Style — bold modern",
-          aspect: "2 / 3",
-          src: "/showcase/feature-bold.png",
-          alt: "Bold modern print centered on Los Angeles",
-        },
-      },
-      {
-        title: "Night sky",
-        body: "Deep ink background, places glowing like stars over a dark map.",
-        media: {
-          label: "Style — night sky",
-          aspect: "2 / 3",
-          src: "/showcase/feature-night-sky.png",
-          alt: "Night sky print centered on Reykjavik with places glowing like stars",
-        },
-      },
+      "Hahnemühle 310gsm paper",
+      "Archival giclée inks",
+      "Natural oak frames",
+      "Free US shipping",
+      "Damage replacement guarantee",
     ],
-    layoutEngine: {
-      title: "Forty places. No overlapping labels.",
-      body: "Add as many places as you like and the names still don't collide. Our layout engine nudges every label into clear space — the arrows never move, so each bearing stays true — and a crowded map stays readable at any print size.",
-      media: { label: "Before / after — overlapping pins vs. Pinprint's resolved labels", aspect: "16 / 10" },
-    },
-    exportCard: {
-      title: "Export ready to print",
-      body: "Download a crisp SVG for any size, or a print-quality PNG at full resolution. No watermarks on paid plans.",
-      media: {
-        label: "Export formats — SVG + print-quality PNG",
-        aspect: "2 / 3",
-        src: "/showcase/exportcard-export-formats.png",
-        alt: "Bold modern print centered on Amsterdam",
-      },
-    },
   },
 
   howItWorks: {
@@ -140,143 +66,144 @@ export const copy = {
     headline: "Three steps to a finished print.",
     steps: [
       {
-        title: "Set your home",
-        body: "Search for a place or drop a pin on the map. Everything is measured from here.",
-        media: { label: "Step 1 — picking home on the map", aspect: "16 / 10" },
+        title: "Start at home",
+        body: "Search for the place you call home, or drop a pin on the map. Every arrow and every distance on your print is measured from here.",
       },
       {
-        title: "Add your places",
-        body: "Tag each one as born, lived, visited, or family. Add as many as you like.",
-        media: { label: "Step 2 — adding tagged places", aspect: "16 / 10" },
+        title: "Add the places that matter",
+        body: "The town you were born in. The city you fell in love with. The coast your family still lives on. Tag each one as born, lived, visited, or family.",
       },
       {
-        title: "Style and export",
-        body: "Switch between styles, tweak the details, then download to print or frame.",
-        media: { label: "Step 3 — styling and exporting", aspect: "16 / 10" },
+        title: "Make it yours, then print",
+        body: "Choose one of ten looks and watch the preview redraw as you work. Order it framed or unframed, or take the files and print it yourself.",
       },
     ],
   },
 
-  globe: {
-    eyebrow: "How to read it",
-    headline: "Home in the middle. Everywhere else, drawn true.",
-    body: "Here's what you're looking at. Your home sits at the center. Every other place gets an arrow pointing in its real compass direction, with the great-circle distance — the actual shortest path across the globe — printed beside it. Search your own home town and watch every reading change.",
-    // Three short labels that decode a single piece for a first-time visitor.
+  // The authority section: why the map can be trusted, written for someone
+  // who has never seen the product. Pairs with the interactive globe.
+  accuracy: {
+    eyebrow: "The cartography",
+    headline: "Accurate enough to navigate by.",
+    body: [
+      "A Pinprint is not decorated with random arrows. It is drawn from real coordinates. Each arrow points along the true compass bearing from your home to that place, and the number beside it is the great-circle distance, the actual shortest path over the curve of the earth.",
+      "When forty labels crowd the page, our layout engine nudges each name into clear space. It never moves an arrow. The direction is the whole point, so the direction stays true no matter what.",
+    ],
     annotations: [
       { term: "Home", def: "The center point. Everything is measured from here." },
-      { term: "The arrow", def: "Points in that place's true compass bearing from home." },
-      { term: "The number", def: "The real distance, as the crow flies." },
+      { term: "The arrow", def: "Points along that place's true compass bearing from home." },
+      { term: "The number", def: "The great-circle distance, as the crow flies." },
     ],
-    tryLabel: "Try it — measure from your home town",
+    fidelity:
+      "The artwork is drawn as vector graphics and rendered for print on our servers at 300 DPI. Whatever size you order, every hairline and every label comes out sharp.",
+    tryLabel: "Try it. Measure from your own home town.",
     posterLabel: "The print it makes",
     posterCta: "Make your own",
   },
 
-  showcase: {
+  craft: {
+    eyebrow: "The craft",
+    headline: "Paper you notice the moment you pick it up.",
+    body: [
+      "Every print is made to order on Hahnemühle German Etching, a 310gsm textured fine art paper, with archival pigment inks that hold their color for decades. Each one is checked by hand before it ships.",
+      "For scale: everyday printer paper weighs about 90gsm. Most poster-shop prints are 120 to 170. This is 310, closer to card than paper, with a surface texture you can feel.",
+      "Framed prints come on smooth 300gsm cotton rag behind glass, in a solid natural oak frame that arrives wired and ready to hang.",
+    ],
+    media: {
+      label: "Close-up of 310gsm cotton paper and an oak frame corner",
+      aspect: "3 / 2",
+      src: "/showcase/scene-craft.png",
+      alt: "Macro photograph of thick textured fine art paper with a deckled edge beside the corner of a natural oak frame",
+    },
+  },
+
+  styles: {
+    eyebrow: "Pick a look",
+    headline: "Ten looks. The same places, drawn true.",
+    body: "Switch between looks at any time. Your home, your places, and every bearing stay exactly where they are.",
+    // The look cards themselves come straight from src/lib/looks/looks.ts so
+    // the gallery can never drift from what the studio actually ships.
+  },
+
+  stories: {
     eyebrow: "Made with Pinprint",
-    headline: "A few we'd hang ourselves.",
+    headline: "Every one tells a different story.",
     items: [
       {
-        label: "Example — a transatlantic family",
-        aspect: "2 / 3",
-        src: "/showcase/showcase-transatlantic-family.png",
-        alt: "Sea-atlas print of a transatlantic family, centered on London",
+        title: "Where it started",
+        caption: "Five southern cities, measured from Nashville.",
+        src: "/showcase/story-where-it-started.png",
+        alt: "Heirloom-style Pinprint centered on Nashville",
       },
       {
-        label: "Example — a decade of moves",
-        aspect: "2 / 3",
-        src: "/showcase/showcase-decade-of-moves.png",
-        alt: "Topographic print of a decade of moves, centered on Denver",
+        title: "The honeymoon",
+        caption: "Four stops on one trip, measured from Seattle.",
+        src: "/showcase/story-the-honeymoon.png",
+        alt: "Celestial Pinprint centered on Seattle",
       },
       {
-        label: "Example — student years abroad",
-        aspect: "2 / 3",
-        src: "/showcase/showcase-student-years-abroad.png",
-        alt: "Blueprint print of student years abroad, centered on Manchester",
+        title: "First home",
+        caption: "Every city on the way to Portland.",
+        src: "/showcase/story-first-home.png",
+        alt: "Minimal Pinprint centered on Portland",
       },
       {
-        label: "Example — coastal hometowns",
-        aspect: "2 / 3",
-        src: "/showcase/showcase-coastal-hometowns.png",
-        alt: "Minimal compass print of coastal hometowns, centered on Brighton",
+        title: "Family across oceans",
+        caption: "Five family homes, measured from Toronto.",
+        src: "/showcase/story-family-across-oceans.png",
+        alt: "Atlas-style Pinprint centered on Toronto",
       },
       {
-        label: "Example — three continents",
-        aspect: "2 / 3",
-        src: "/showcase/lady_holding_poster.png",
-        alt: "A person holding a framed night-sky print centered on Singapore, spanning three continents",
+        title: "The year abroad",
+        caption: "A year of trains, measured from Bristol.",
+        src: "/showcase/story-the-year-abroad.png",
+        alt: "Swiss editorial Pinprint centered on Bristol",
       },
       {
-        label: "Example — one long road trip",
-        aspect: "2 / 3",
-        src: "/showcase/showcase-one-long-road-trip.png",
-        alt: "Art deco print of one long road trip, centered on Chicago",
+        title: "Every house so far",
+        caption: "Five moves across two hemispheres, measured from Wellington.",
+        src: "/showcase/story-every-house-so-far.png",
+        alt: "Topographic Pinprint centered on Wellington",
       },
     ],
   },
 
-  testimonials: {
-    eyebrow: "What people say",
-    headline: "The wall gift people actually keep.",
-    // NOTE: illustrative sample quotes with placeholder attributions — replace
-    // with real, permissioned customer testimonials before launch.
-    items: [
-      {
-        quote:
-          "I made one for my mum with every house we'd lived in. She cried, then asked me to make one for my aunt.",
-        name: "Hannah M.",
-        role: "Gift for her mum · Bristol",
-      },
-      {
-        quote:
-          "Forty-one places and not a single label overlapping. I don't know how it does it, but it looks printed by hand.",
-        name: "Daniel O.",
-        role: "Travel map · Toronto",
-      },
-      {
-        quote:
-          "Took five minutes. It's been on my wall for a year and people still ask about it.",
-        name: "Priya R.",
-        role: "Home office · Manchester",
-      },
-    ],
+  pricingPreview: {
+    eyebrow: "Pricing",
+    headline: "Priced like the object it is.",
+    body: "Three sizes, framed or unframed, printed on the same paper either way. Shipping in the United States is free, and every order includes the digital files.",
+    link: { label: "See pricing and sizes", href: "/pricing" },
   },
 
   faq: {
-    // Landing-page teaser heading. Only the `featured` items below appear here;
-    // the full list lives on the dedicated /faq page (grouped by category).
     eyebrow: "Questions",
     headline: "Good to know.",
     seeAll: { label: "See all questions", href: "/faq" },
-    // Heading + metadata for the dedicated /faq page.
     page: {
       eyebrow: "FAQ",
       headline: "Everything you might want to know.",
       intro:
-        "Designing your print, sizes and framing, shipping, and what happens if something isn't right — it's all here. Still stuck? Get in touch and we'll help.",
-      metaTitle: "FAQ — Pinprint",
+        "Designing your print, sizes and framing, shipping, and what happens if something isn't right. It's all here. Still stuck? Write to us and we'll help.",
+      metaTitle: "FAQ | Pinprint",
       metaDescription:
-        "Answers about designing your Pinprint print, sizes and framing, shipping and delivery, returns, and your account.",
+        "Answers about designing your Pinprint, sizes and framing, shipping and delivery, returns, and your account.",
     },
-    // The full FAQ, grouped by category. `featured: true` marks the questions
-    // surfaced on the landing page (the biggest pre-purchase objections); they
-    // flatten in group order into: how it works → sizes → delivery → damaged → account.
     groups: [
       {
         title: "Designing your print",
         items: [
           {
             q: "How are the arrows and distances worked out?",
-            a: "Each arrow points along the true compass bearing from your home to the place, and the distance is the great-circle distance — the real shortest path across the globe.",
+            a: "From real coordinates. Each arrow points along the true compass bearing from your home to the place, and the distance is the great-circle distance, the real shortest path across the globe.",
             featured: true,
           },
           {
             q: "How many places can I add?",
-            a: "As many as you like. The layout engine keeps labels from overlapping, even on a crowded map.",
+            a: "As many as you like. The layout engine keeps labels from overlapping, even on a crowded map, and it never moves an arrow to do it.",
           },
           {
             q: "Can I change the design after I've added places?",
-            a: "Yes. Switch between all four designs at any time — your home and places stay exactly where they are.",
+            a: "Yes. Switch between all ten looks at any time. Your home and places stay exactly where they are.",
           },
         ],
       },
@@ -285,20 +212,20 @@ export const copy = {
         items: [
           {
             q: "What sizes can I order?",
-            a: "Three portrait sizes: 12×18, 16×24, and 24×36 inches. The artwork is drawn as vector graphics, so every size prints razor-sharp.",
+            a: "Three portrait sizes: 12 by 18, 16 by 24, and 24 by 36 inches. The artwork is drawn as vector graphics and rendered for print at 300 DPI, so every size prints sharp.",
             featured: true,
           },
           {
             q: "How is each print made?",
-            a: "Made to order with archival pigment inks that resist fading for decades, printed the moment you order — checked by hand, never mass-produced. Loose prints are on Hahnemühle German Etching 310gsm, a heavily textured fine-art paper chosen for the way it feels in your hands. Framed prints use 300gsm 100% cotton-rag paper — smooth and clean behind glass — with a premium natural-oak ready-to-hang frame.",
+            a: "Made to order the moment you buy, with archival pigment inks that resist fading for decades, and checked by hand before it ships. Loose prints are on Hahnemühle German Etching, a heavily textured 310gsm fine art paper. Framed prints use smooth 300gsm cotton rag, which sits cleanly behind glass.",
           },
           {
             q: "Can I get it framed?",
-            a: "Yes. Add a premium natural-oak ready-to-hang frame at checkout: solid wood, glass front, arrives wired so it goes straight on the wall. Framed prints use 300gsm 100% cotton-rag paper — smooth and clean behind glass — no compromise on the paper.",
+            a: "Yes. Add a natural oak frame at checkout: solid wood, glass front, arrives wired so it goes straight on the wall. Framed prints use 300gsm cotton rag paper, so there's no compromise on the paper.",
           },
           {
             q: "Can I just buy the digital file?",
-            a: "Yes. Choose the digital download for a print-ready PNG and a scalable SVG you can print yourself, at any size. Every printed order includes the digital files too.",
+            a: "Yes. The digital download is a print-ready PNG plus a scalable SVG you can print yourself at any size. Every printed order includes the digital files too.",
           },
         ],
       },
@@ -307,12 +234,12 @@ export const copy = {
         items: [
           {
             q: "When will my print arrive?",
-            a: "Most orders arrive within 5–10 business days. Your print is made and shipped within 2–3 business days, and you'll get a tracking link by email the moment it's on its way.",
+            a: "Most orders arrive within 5 to 10 business days. Your print is made and shipped within 2 to 3 business days, and you'll get a tracking link by email the moment it's on its way.",
             featured: true,
           },
           {
             q: "Where do you ship, and how much does it cost?",
-            a: "We currently ship anywhere in the United States, and shipping is free — the price you see is the price you pay, with nothing added at checkout.",
+            a: "We currently ship anywhere in the United States, and shipping is free. The price you see is the price you pay, with nothing added at checkout.",
           },
         ],
       },
@@ -321,16 +248,16 @@ export const copy = {
         items: [
           {
             q: "What if my print arrives damaged or there's a fault?",
-            a: "We'll make it right. If your print arrives damaged, or there's a fault, email us a quick photo and we'll send a free replacement or refund you — no need to post the original back.",
+            a: "We'll make it right. If your print arrives damaged, or there's a fault, email us a quick photo and we'll send a free replacement or refund you. No need to post the original back.",
             featured: true,
           },
           {
             q: "Can I return it if I change my mind?",
-            a: "Because every piece is made to order from your own design, we can't take change-of-mind returns. Preview your print as much as you like before you buy — and if anything's wrong with what arrives, we'll always sort it out.",
+            a: "Because every piece is made to order from your own design, we can't take change-of-mind returns. Preview your print as much as you like before you buy, and if anything is wrong with what arrives, we'll always sort it out.",
           },
           {
             q: "Can I change my order or shipping address after I've paid?",
-            a: "Get in touch as soon as you can. We can update or cancel an order while it's still in the queue, but once it's gone into production it's locked in and on its way.",
+            a: "Write to us as soon as you can. We can update or cancel an order while it's still in the queue, but once it's gone into production it's locked in and on its way.",
           },
         ],
       },
@@ -344,7 +271,7 @@ export const copy = {
           },
           {
             q: "Is my location data private?",
-            a: "Your places are only ever used to render your artwork — we don't sell them or share them with anyone.",
+            a: "Your places are only ever used to render your artwork. We don't sell them or share them with anyone.",
           },
         ],
       },
@@ -354,8 +281,14 @@ export const copy = {
   finalCta: {
     headline: "Put your places on the wall.",
     subhead:
-      "Design your first piece in a few minutes. Free to design — pay only when you print.",
+      "Designing is free and takes about five minutes. Pay only when you print.",
     cta: PRIMARY_CTA,
+    media: {
+      label: "A framed Pinprint leaning on a wall beside wrapping paper",
+      aspect: "3 / 2",
+      src: "/showcase/scene-gift.png",
+      alt: "Framed celestial Pinprint of Seattle leaning against an ivory wall next to kraft wrapping paper and twine",
+    },
   },
 
   footer: {
@@ -365,8 +298,9 @@ export const copy = {
         title: "Product",
         links: [
           { label: "How it works", href: "/#how-it-works" },
-          { label: "Styles", href: "/#features" },
-          { label: "Examples", href: "/#showcase" },
+          { label: "Styles", href: "/#styles" },
+          { label: "Examples", href: "/#stories" },
+          { label: "Pricing", href: "/pricing" },
           { label: "Create a print", href: STUDIO_HREF },
         ],
       },
@@ -374,9 +308,8 @@ export const copy = {
         title: "Resources",
         links: [
           { label: "FAQ", href: "/faq" },
-          { label: "Print guide", href: "#" },
-          { label: "Gift ideas", href: "#" },
-          { label: "Contact", href: "#" },
+          { label: "Track an order", href: "/track" },
+          { label: "Contact", href: "mailto:hello@pinprint.com" },
         ],
       },
       {
@@ -395,12 +328,11 @@ export const copy = {
       {
         title: "Legal",
         links: [
-          { label: "Privacy", href: "#" },
-          { label: "Terms", href: "#" },
-          { label: "Licenses", href: "#" },
+          { label: "Privacy", href: "/privacy" },
+          { label: "Terms", href: "/terms" },
         ],
       },
     ],
-    copyright: "© Pinprint. Placeholder footer — replace links before launch.",
+    copyright: "© Pinprint. Every print made to order.",
   },
 } as const;

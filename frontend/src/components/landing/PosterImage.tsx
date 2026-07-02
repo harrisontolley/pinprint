@@ -1,21 +1,14 @@
 import Image from "next/image";
-import { MediaPlaceholder } from "./MediaPlaceholder";
 
 /**
- * Renders a real poster image when the media slot has a `src`, otherwise falls
- * back to the dashed `MediaPlaceholder`. Lets a section mix produced posters
- * (Hero, feature styles, showcase, export card) with slots still awaiting art
- * (the layout-engine before/after) without branching at each call site.
- *
- * Poster PNGs are 1000×1500 (2:3); the wrapper enforces that aspect so the full
- * poster shows uncropped.
+ * A produced poster render (public/showcase/*.png, 1000x1500 at 2x). The
+ * wrapper enforces the 2:3 aspect so the full poster shows uncropped.
  */
 type Media = {
   label: string;
   aspect?: string;
-  src?: string;
+  src: string;
   alt?: string;
-  caption?: string;
 };
 
 export function PosterImage({
@@ -29,17 +22,6 @@ export function PosterImage({
   priority?: boolean;
   sizes?: string;
 }) {
-  if (!media.src) {
-    return (
-      <MediaPlaceholder
-        label={media.label}
-        aspect={media.aspect}
-        caption={media.caption}
-        className={className}
-      />
-    );
-  }
-
   return (
     <div
       className={`overflow-hidden rounded-xl ${className}`}
