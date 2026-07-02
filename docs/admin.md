@@ -56,7 +56,11 @@ Every mutation writes an `admin_actions` audit row (`actor_email`, `action`, `de
   `event_id` (unique → idempotency), `signature_valid`, `processing_status`
   (`received`/`processed`/`ignored`/`error`), `error`, `payload`, `received_at`. This is the forensic
   record; dedupe keys on **successful processing**, so a transient handler failure 500s and the
-  provider's retry reprocesses (no silently-lost events).
+  provider's retry reprocesses (no silently-lost events). `processing_status = 'processed'` only means
+  the *order status* advanced (e.g. to `paid`) — the paid-transition side effects (Artelo submit,
+  digital-delivery email) are deferred past the webhook's response and run afterward, so check
+  `fulfillments` / `order_events` for their actual outcome, and note the hourly
+  `/jobs/fulfillment-sweep` cron re-runs both for any `paid` order still missing one after 15 minutes.
 - **`fulfillments`** — one row per Artelo submission attempt: request/response, `is_test`,
   `attempt_count`, and COGS (`production/shipping/tax_cents`).
 - **`admin_actions`** — who did what to which order.
@@ -72,7 +76,9 @@ refunds flip status to `refunded`; partials stay in the fulfilment state with a 
 
 **A fulfilment failed (Artelo down / bad data).** The order shows "fulfilment failed" and appears in the
 metrics "failed fulfilments" count. Fix the cause if needed, then **Retry fulfilment**. It clears the
-failed Artelo id and re-submits; the new attempt is logged.
+failed Artelo id and re-submits; the new attempt is logged. Note it's a synchronous server render on
+textured templates — the request can take **~35 s** before the dashboard shows the result; don't assume
+it's stuck and re-click.
 
 **Cancel an order.** **Cancel + refund** cancels the Artelo order *if it's still cancellable*
 (pre-production) and refunds via Stripe. If Artelo refuses (already in production, or a test order),
