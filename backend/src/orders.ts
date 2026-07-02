@@ -480,11 +480,18 @@ export type FulfillmentOrder = {
   arteloOrderId: string | null;
   shipping: OrderShippingAddress;
   items: {
+    /** order_items row id — lets the renderer persist render_asset_url per line. */
+    id: string;
     productId: string;
     productLabel: string;
     quantity: number;
     unitPriceCents: number;
+    /** Browser-canvas PNG (the fallback print asset). */
     assetUrl: string | null;
+    /** Serialized vector SVG the server render rasterizes from (Phase B). */
+    svgAssetUrl: string | null;
+    /** Exact-DPI server-rendered PNG, once produced (Phase C; idempotent reuse). */
+    renderAssetUrl: string | null;
     posterConfig: Record<string, unknown>;
   }[];
 };
@@ -501,9 +508,15 @@ export async function getOrderForFulfillment(orderId: string): Promise<Fulfillme
   const row = rows[0];
   if (!row) return null;
   const items = (await sql`
-    select product_id, product_label, quantity, unit_price_cents, poster_config, asset_url
+    select id, product_id, product_label, quantity, unit_price_cents, poster_config,
+           asset_url, svg_asset_url, render_asset_url
     from order_items where order_id = ${orderId} order by created_at asc
-  `) as unknown as (ItemRow & { poster_config: Record<string, unknown> })[];
+  `) as unknown as (ItemRow & {
+    id: string;
+    poster_config: Record<string, unknown>;
+    svg_asset_url: string | null;
+    render_asset_url: string | null;
+  })[];
   return {
     id: row.id,
     orderNumber: row.order_number,
@@ -521,14 +534,29 @@ export async function getOrderForFulfillment(orderId: string): Promise<Fulfillme
       country: row.ship_country ?? undefined,
     },
     items: items.map((it) => ({
+      id: it.id,
       productId: it.product_id,
       productLabel: it.product_label,
       quantity: it.quantity,
       unitPriceCents: it.unit_price_cents,
       assetUrl: it.asset_url ?? null,
+      svgAssetUrl: it.svg_asset_url ?? null,
+      renderAssetUrl: it.render_asset_url ?? null,
       posterConfig: it.poster_config ?? {},
     })),
   };
+}
+
+/**
+ * Persist the exact-DPI server render's blob URL onto a line item so a re-run or
+ * reprint reuses it instead of re-rasterizing (idempotency). DB-guarded no-op.
+ */
+export async function setRenderAssetUrl(orderItemId: string, url: string): Promise<void> {
+  const sql = getSql();
+  if (!sql) return;
+  await sql`
+    update order_items set render_asset_url = ${url} where id = ${orderItemId}
+  `;
 }
 
 export type FulfillmentAttempt = {
@@ -716,4 +744,57 @@ export async function releaseDigitalDeliveryClaim(orderId: string): Promise<void
     update orders set digital_delivered_at = null, updated_at = now()
     where id = ${orderId}
   `;
+}
+
+// ── Fulfilment sweep (crash-mid-deferred-task safety net) ───────────────────
+
+export type SweepCandidate = { id: string; orderNumber: string };
+
+/**
+ * Paid orders that still look unfinished past the deferred-task window, for the
+ * hourly `/jobs/fulfillment-sweep` cron (routes/jobs.ts). The Stripe webhook now
+ * defers its two paid-transition side effects (Artelo submit + digital delivery)
+ * past the 200 response via waitUntil — a process kill mid-task leaves a paid
+ * order stuck with no retry signal. Candidates are `paid` orders whose
+ * `paid_at` is older than 15 minutes (well past normal deferred-task duration)
+ * and either:
+ *   (a) have a non-digital line item but no `artelo_order_id` yet, or
+ *   (b) have a line item with a deliverable asset but `digital_delivered_at`
+ *       is still null.
+ * Ordered oldest-first and capped by `limit`. Both `submitOrderToArtelo` and
+ * `deliverDigitalFiles` are idempotent + never-throw, so the caller can just
+ * re-run both for every candidate without re-deriving which half is missing.
+ */
+export async function findOrdersNeedingFulfillmentSweep(limit: number): Promise<SweepCandidate[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  const rows = (await sql`
+    select o.id, o.order_number
+    from orders o
+    where o.status = 'paid'
+      and o.paid_at is not null
+      and o.paid_at < now() - interval '15 minutes'
+      and (
+        (
+          o.artelo_order_id is null
+          and exists (
+            select 1 from order_items oi
+            where oi.order_id = o.id
+              and coalesce(oi.poster_config->>'format', '') <> 'digital'
+          )
+        )
+        or
+        (
+          o.digital_delivered_at is null
+          and exists (
+            select 1 from order_items oi
+            where oi.order_id = o.id
+              and (oi.asset_url is not null or oi.svg_asset_url is not null)
+          )
+        )
+      )
+    order by o.paid_at asc
+    limit ${limit}
+  `) as unknown as { id: string; order_number: string }[];
+  return rows.map((r) => ({ id: r.id, orderNumber: r.order_number }));
 }

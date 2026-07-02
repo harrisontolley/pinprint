@@ -21,6 +21,8 @@ export async function serializePoster(svg: SVGSVGElement): Promise<string> {
   const css = await buildEmbeddedFontStyle();
   const style = document.createElementNS(SVG_NS, "style");
   style.textContent = css;
+  // backend/src/renderPrint.ts strips this exact block for server rendering —
+  // keep it a single attribute-free <style> element.
   clone.insertBefore(style, clone.firstChild);
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`;
