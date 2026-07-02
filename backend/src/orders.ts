@@ -745,3 +745,56 @@ export async function releaseDigitalDeliveryClaim(orderId: string): Promise<void
     where id = ${orderId}
   `;
 }
+
+// ── Fulfilment sweep (crash-mid-deferred-task safety net) ───────────────────
+
+export type SweepCandidate = { id: string; orderNumber: string };
+
+/**
+ * Paid orders that still look unfinished past the deferred-task window, for the
+ * hourly `/jobs/fulfillment-sweep` cron (routes/jobs.ts). The Stripe webhook now
+ * defers its two paid-transition side effects (Artelo submit + digital delivery)
+ * past the 200 response via waitUntil — a process kill mid-task leaves a paid
+ * order stuck with no retry signal. Candidates are `paid` orders whose
+ * `paid_at` is older than 15 minutes (well past normal deferred-task duration)
+ * and either:
+ *   (a) have a non-digital line item but no `artelo_order_id` yet, or
+ *   (b) have a line item with a deliverable asset but `digital_delivered_at`
+ *       is still null.
+ * Ordered oldest-first and capped by `limit`. Both `submitOrderToArtelo` and
+ * `deliverDigitalFiles` are idempotent + never-throw, so the caller can just
+ * re-run both for every candidate without re-deriving which half is missing.
+ */
+export async function findOrdersNeedingFulfillmentSweep(limit: number): Promise<SweepCandidate[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  const rows = (await sql`
+    select o.id, o.order_number
+    from orders o
+    where o.status = 'paid'
+      and o.paid_at is not null
+      and o.paid_at < now() - interval '15 minutes'
+      and (
+        (
+          o.artelo_order_id is null
+          and exists (
+            select 1 from order_items oi
+            where oi.order_id = o.id
+              and coalesce(oi.poster_config->>'format', '') <> 'digital'
+          )
+        )
+        or
+        (
+          o.digital_delivered_at is null
+          and exists (
+            select 1 from order_items oi
+            where oi.order_id = o.id
+              and (oi.asset_url is not null or oi.svg_asset_url is not null)
+          )
+        )
+      )
+    order by o.paid_at asc
+    limit ${limit}
+  `) as unknown as { id: string; order_number: string }[];
+  return rows.map((r) => ({ id: r.id, orderNumber: r.order_number }));
+}

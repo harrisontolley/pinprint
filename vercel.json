@@ -11,5 +11,8 @@
       "routePrefix": "/_/backend"
     }
   },
-  "crons": [{ "path": "/_/backend/jobs/blob-gc", "schedule": "0 3 * * *" }]
+  "crons": [
+    { "path": "/_/backend/jobs/blob-gc", "schedule": "0 3 * * *" },
+    { "path": "/_/backend/jobs/fulfillment-sweep", "schedule": "0 * * * *" }
+  ]
 }
