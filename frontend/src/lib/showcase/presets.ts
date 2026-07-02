@@ -6,20 +6,24 @@ import type { TemplateId, VintageVariant } from "@/lib/templates/types";
  *
  * These drive the dev-only `/render/[id]` route and the `render-posters` script
  * (see frontend/scripts/render-posters.ts). Coordinates are hardcoded real
- * cities so generation needs no geocoder/backend. Each preset maps to one media
- * slot in the landing copy (frontend/src/components/landing/copy.ts) and together
- * they cover a representative spread of templates (incl. the trend looks).
+ * cities so generation needs no geocoder/backend. Three families:
+ *
+ *  - `look-<lookId>`: one per studio look (src/lib/looks/looks.ts), used by the
+ *    landing style gallery. Distinct geography per look so the grid never repeats.
+ *  - `story-*`: the evocative example prints ("Made with Pinprint" stories).
+ *  - `hero-poster` / `exportcard-*`: singles consumed by the hero scene
+ *    compositor (scripts/compose-scenes.ts) and the export/craft imagery.
  *
  * NOTE: the committed PNGs under public/showcase are pre-rendered. After changing
- * a preset's templateId, regenerate them with `pnpm --filter @pinprint/frontend
- * render:posters` (on-demand; needs Playwright + a dev server).
+ * a preset, regenerate with `pnpm --filter @pinprint/frontend render:posters`
+ * (on-demand; needs Playwright + a dev server).
  */
 
 export type PosterPreset = {
   /** Stable slug — also the output filename, e.g. "/showcase/<slug>.png". */
   slug: string;
   /** Which kind of landing slot this fills (informational). */
-  slot: "hero" | "feature" | "showcase" | "exportCard";
+  slot: "hero" | "look" | "story" | "exportCard";
   templateId: TemplateId;
   /** Only consulted when templateId === "vintage-cartography". */
   vintageVariant?: VintageVariant;
@@ -51,156 +55,242 @@ const home = (label: string, lat: number, lng: number): Place => ({
 });
 
 export const PRESETS: PosterPreset[] = [
+  // ── Hero: the poster composited into the hero lifestyle scene ─────────────
   {
-    slug: "hero-home-london",
+    slug: "hero-poster",
     slot: "hero",
-    templateId: "vintage-cartography",
-    vintageVariant: "classic",
-    units: "km",
-    home: home("London", 51.5074, -0.1278),
-    places: [
-      P("New York", 40.7128, -74.006, "visited"),
-      P("Paris", 48.8566, 2.3522, "lived"),
-      P("Edinburgh", 55.9533, -3.1883, "born"),
-      P("Sydney", -33.8688, 151.2093, "family"),
-      P("Lisbon", 38.7223, -9.1393, "visited"),
-    ],
-  },
-  {
-    slug: "feature-vintage",
-    slot: "feature",
-    templateId: "vintage-cartography",
-    vintageVariant: "classic",
-    units: "km",
-    home: home("Rome", 41.9028, 12.4964),
-    places: [
-      P("London", 51.5074, -0.1278, "family"),
-      P("Istanbul", 41.0082, 28.9784, "visited"),
-      P("Tunis", 36.8065, 10.1815, "visited"),
-      P("Lisbon", 38.7223, -9.1393, "lived"),
-    ],
-  },
-  {
-    slug: "feature-minimal",
-    slot: "feature",
-    templateId: "minimal-compass",
-    units: "km",
-    home: home("Copenhagen", 55.6761, 12.5683),
-    places: [
-      P("Oslo", 59.9139, 10.7522, "family"),
-      P("Berlin", 52.52, 13.405, "lived"),
-      P("Tokyo", 35.6762, 139.6503, "visited"),
-      P("New York", 40.7128, -74.006, "visited"),
-    ],
-  },
-  {
-    slug: "feature-bold",
-    slot: "feature",
-    templateId: "bold-modern",
+    templateId: "warm-minimal",
     units: "mi",
-    home: home("Los Angeles", 34.0522, -118.2437),
+    home: home("San Francisco", 37.7749, -122.4194),
     places: [
-      P("Vancouver", 49.2827, -123.1207, "visited"),
-      P("New York", 40.7128, -74.006, "lived"),
-      P("Mexico City", 19.4326, -99.1332, "family"),
-      P("Tokyo", 35.6762, 139.6503, "visited"),
+      P("Seoul", 37.5665, 126.978, "born"),
+      P("Chicago", 41.8781, -87.6298, "lived"),
+      P("Oaxaca", 17.0732, -96.7266, "family"),
+      P("Lisbon", 38.7223, -9.1393, "visited"),
+      P("Sydney", -33.8688, 151.2093, "visited"),
+    ],
+  },
+
+  // ── One render per studio look (style gallery) ────────────────────────────
+  {
+    slug: "look-warm-minimal",
+    slot: "look",
+    templateId: "warm-minimal",
+    units: "km",
+    home: home("Florence", 43.7696, 11.2558),
+    places: [
+      P("London", 51.5074, -0.1278, "lived"),
+      P("Copenhagen", 55.6761, 12.5683, "visited"),
+      P("New York", 40.7128, -74.006, "visited"),
+      P("Kyoto", 35.0116, 135.7681, "visited"),
     ],
   },
   {
-    slug: "feature-night-sky",
-    slot: "feature",
+    slug: "look-mid-century",
+    slot: "look",
+    templateId: "mid-century",
+    units: "mi",
+    home: home("Palm Springs", 33.8303, -116.5453),
+    places: [
+      P("Los Angeles", 34.0522, -118.2437, "lived"),
+      P("Chicago", 41.8781, -87.6298, "born"),
+      P("Mexico City", 19.4326, -99.1332, "visited"),
+      P("Austin", 30.2672, -97.7431, "family"),
+    ],
+  },
+  {
+    slug: "look-swiss",
+    slot: "look",
+    templateId: "swiss-editorial",
+    units: "km",
+    home: home("Zürich", 47.3769, 8.5417),
+    places: [
+      P("Milan", 45.4642, 9.19, "family"),
+      P("Paris", 48.8566, 2.3522, "lived"),
+      P("Berlin", 52.52, 13.405, "lived"),
+      P("Vienna", 48.2082, 16.3738, "visited"),
+    ],
+  },
+  {
+    slug: "look-celestial",
+    slot: "look",
+    templateId: "celestial",
+    units: "km",
+    home: home("Queenstown", -45.0312, 168.6626),
+    places: [
+      P("Auckland", -36.8485, 174.7633, "born"),
+      P("Sydney", -33.8688, 151.2093, "lived"),
+      P("Tokyo", 35.6762, 139.6503, "visited"),
+      P("Santiago", -33.4489, -70.6693, "visited"),
+    ],
+  },
+  {
+    slug: "look-heirloom",
+    slot: "look",
+    templateId: "vintage-cartography",
+    vintageVariant: "classic",
+    units: "mi",
+    home: home("Boston", 42.3601, -71.0589),
+    places: [
+      P("Dublin", 53.3498, -6.2603, "family"),
+      P("Palermo", 38.1157, 13.3615, "family"),
+      P("Kraków", 50.0647, 19.945, "family"),
+      P("Halifax", 44.6488, -63.5752, "visited"),
+    ],
+  },
+  {
+    slug: "look-nightfall",
+    slot: "look",
     templateId: "night-sky",
     units: "km",
-    home: home("Reykjavik", 64.1466, -21.9426),
+    home: home("Oslo", 59.9139, 10.7522),
     places: [
       P("Tromsø", 69.6492, 18.9553, "family"),
-      P("Stockholm", 59.3293, 18.0686, "lived"),
-      P("Lisbon", 38.7223, -9.1393, "born"),
-      P("New York", 40.7128, -74.006, "visited"),
+      P("Reykjavik", 64.1466, -21.9426, "visited"),
+      P("Edinburgh", 55.9533, -3.1883, "lived"),
+      P("Montreal", 45.5017, -73.5673, "visited"),
     ],
   },
   {
-    slug: "showcase-transatlantic-family",
-    slot: "showcase",
+    slug: "look-blueprint",
+    slot: "look",
+    templateId: "blueprint",
+    units: "km",
+    home: home("Berlin", 52.52, 13.405),
+    places: [
+      P("Rotterdam", 51.9244, 4.4777, "lived"),
+      P("Vienna", 48.2082, 16.3738, "visited"),
+      P("Detroit", 42.3314, -83.0458, "born"),
+      P("Tallinn", 59.437, 24.7536, "visited"),
+    ],
+  },
+  {
+    slug: "look-modern",
+    slot: "look",
+    templateId: "bold-modern",
+    units: "km",
+    home: home("Tokyo", 35.6762, 139.6503),
+    places: [
+      P("Seoul", 37.5665, 126.978, "visited"),
+      P("San Francisco", 37.7749, -122.4194, "lived"),
+      P("Sydney", -33.8688, 151.2093, "visited"),
+      P("Berlin", 52.52, 13.405, "lived"),
+    ],
+  },
+  {
+    slug: "look-field-map",
+    slot: "look",
+    templateId: "topographic",
+    units: "mi",
+    home: home("Boulder", 40.015, -105.2705),
+    places: [
+      P("Banff", 51.1784, -115.5708, "visited"),
+      P("Moab", 38.5733, -109.5498, "visited"),
+      P("Jackson", 43.4799, -110.7624, "lived"),
+      P("Flagstaff", 35.1983, -111.6513, "born"),
+    ],
+  },
+  {
+    slug: "look-minimal",
+    slot: "look",
+    templateId: "minimal-compass",
+    units: "km",
+    home: home("Kyoto", 35.0116, 135.7681),
+    places: [
+      P("Tokyo", 35.6762, 139.6503, "lived"),
+      P("Seoul", 37.5665, 126.978, "visited"),
+      P("Portland", 45.5152, -122.6784, "lived"),
+      P("Melbourne", -37.8136, 144.9631, "visited"),
+    ],
+  },
+
+  // ── Story prints ("Made with Pinprint") ───────────────────────────────────
+  {
+    slug: "story-where-it-started",
+    slot: "story",
+    templateId: "vintage-cartography",
+    vintageVariant: "classic",
+    units: "mi",
+    home: home("Nashville", 36.1627, -86.7816),
+    places: [
+      P("Memphis", 35.1495, -90.049, "born"),
+      P("Knoxville", 35.9606, -83.9207, "lived"),
+      P("Asheville", 35.5951, -82.5515, "visited"),
+      P("Chicago", 41.8781, -87.6298, "lived"),
+      P("New Orleans", 29.9511, -90.0715, "visited"),
+    ],
+  },
+  {
+    slug: "story-the-honeymoon",
+    slot: "story",
+    templateId: "celestial",
+    units: "mi",
+    home: home("Seattle", 47.6062, -122.3321),
+    places: [
+      P("Florence", 43.7696, 11.2558, "visited"),
+      P("Santorini", 36.3932, 25.4615, "visited"),
+      P("Paris", 48.8566, 2.3522, "visited"),
+      P("Kyoto", 35.0116, 135.7681, "visited"),
+    ],
+  },
+  {
+    slug: "story-first-home",
+    slot: "story",
+    templateId: "minimal-compass",
+    units: "mi",
+    home: home("Portland", 45.5152, -122.6784),
+    places: [
+      P("San Diego", 32.7157, -117.1611, "born"),
+      P("Berkeley", 37.8715, -122.273, "lived"),
+      P("Brooklyn", 40.6782, -73.9442, "lived"),
+      P("Austin", 30.2672, -97.7431, "lived"),
+    ],
+  },
+  {
+    slug: "story-family-across-oceans",
+    slot: "story",
     templateId: "vintage-cartography",
     vintageVariant: "atlas",
     units: "km",
-    home: home("London", 51.5074, -0.1278),
+    home: home("Toronto", 43.6532, -79.3832),
     places: [
-      P("Stockholm", 59.3293, 18.0686, "family"),
-      P("Naples", 40.8518, 14.2681, "family"),
-      P("Lagos", 6.5244, 3.3792, "family"),
-      P("Buenos Aires", -34.6037, -58.3816, "family"),
-      P("New York", 40.7128, -74.006, "family"),
+      P("Manila", 14.5995, 120.9842, "family"),
+      P("Lisbon", 38.7223, -9.1393, "family"),
+      P("Accra", 5.6037, -0.187, "family"),
+      P("Mumbai", 19.076, 72.8777, "family"),
+      P("Glasgow", 55.8642, -4.2518, "family"),
     ],
   },
   {
-    slug: "showcase-decade-of-moves",
-    slot: "showcase",
-    templateId: "topographic",
-    units: "mi",
-    home: home("Denver", 39.7392, -104.9903),
-    places: [
-      P("Austin", 30.2672, -97.7431, "lived"),
-      P("Seattle", 47.6062, -122.3321, "lived"),
-      P("Boston", 42.3601, -71.0589, "lived"),
-      P("Atlanta", 33.749, -84.388, "lived"),
-      P("Portland", 45.5152, -122.6784, "lived"),
-    ],
-  },
-  {
-    slug: "showcase-student-years-abroad",
-    slot: "showcase",
+    slug: "story-the-year-abroad",
+    slot: "story",
     templateId: "swiss-editorial",
     units: "km",
-    home: home("Manchester", 53.4808, -2.2426),
+    home: home("Bristol", 51.4545, -2.5879),
     places: [
-      P("Reykjavik", 64.1466, -21.9426, "visited"),
-      P("Vienna", 48.2082, 16.3738, "lived"),
-      P("Barcelona", 41.3851, 2.1734, "lived"),
-      P("Lisbon", 38.7223, -9.1393, "lived"),
+      P("Prague", 50.0755, 14.4378, "lived"),
+      P("Budapest", 47.4979, 19.0402, "visited"),
+      P("Ljubljana", 46.0569, 14.5058, "visited"),
+      P("Athens", 37.9838, 23.7275, "visited"),
+      P("Marrakech", 31.6295, -7.9811, "visited"),
     ],
   },
   {
-    slug: "showcase-coastal-hometowns",
-    slot: "showcase",
-    templateId: "minimal-compass",
+    slug: "story-every-house-so-far",
+    slot: "story",
+    templateId: "topographic",
     units: "km",
-    home: home("Brighton", 50.8225, -0.1372),
+    home: home("Wellington", -41.2865, 174.7762),
     places: [
-      P("San Sebastián", 43.3183, -1.9812, "visited"),
-      P("Split", 43.5081, 16.4402, "visited"),
-      P("Galway", 53.2707, -9.0568, "family"),
-      P("Nice", 43.7102, 7.262, "visited"),
+      P("Christchurch", -43.5321, 172.6362, "born"),
+      P("Dunedin", -45.8788, 170.5028, "lived"),
+      P("Melbourne", -37.8136, 144.9631, "lived"),
+      P("London", 51.5074, -0.1278, "lived"),
+      P("Amsterdam", 52.3676, 4.9041, "lived"),
     ],
   },
-  {
-    slug: "showcase-three-continents",
-    slot: "showcase",
-    templateId: "celestial",
-    units: "km",
-    home: home("Singapore", 1.3521, 103.8198),
-    places: [
-      P("Nairobi", -1.2921, 36.8219, "family"),
-      P("São Paulo", -23.5505, -46.6333, "visited"),
-      P("Vancouver", 49.2827, -123.1207, "lived"),
-      P("Dubai", 25.2048, 55.2708, "visited"),
-    ],
-  },
-  {
-    slug: "showcase-one-long-road-trip",
-    slot: "showcase",
-    templateId: "mid-century",
-    units: "mi",
-    home: home("Chicago", 41.8781, -87.6298),
-    places: [
-      P("Toronto", 43.6532, -79.3832, "visited"),
-      P("New York", 40.7128, -74.006, "visited"),
-      P("Atlanta", 33.749, -84.388, "visited"),
-      P("New Orleans", 29.9511, -90.0715, "visited"),
-      P("Denver", 39.7392, -104.9903, "visited"),
-    ],
-  },
+
+  // ── Export/craft imagery ───────────────────────────────────────────────────
   {
     slug: "exportcard-export-formats",
     slot: "exportCard",

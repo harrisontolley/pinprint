@@ -12,6 +12,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "render:posters": "tsx scripts/render-posters.ts",
+    "render:scenes": "tsx scripts/compose-scenes.ts",
     "render:layout": "tsx scripts/render-layout-cases.tsx"
   },
   "dependencies": {
