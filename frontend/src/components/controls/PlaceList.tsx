@@ -5,7 +5,6 @@ import { usePosterStore } from "@/lib/store/posterStore";
 import { haversineKm, fmtDistance } from "@/lib/geo";
 import type { Place } from "@/lib/types";
 import { AffiliationPicker } from "./AffiliationPicker";
-import { GradientOrbs } from "@/components/ui/GradientOrbs";
 
 function HomeGlyph() {
   return (
@@ -181,8 +180,7 @@ export function PlaceList() {
 
   if (!home && places.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-xxl bg-canvas-soft px-5 py-9 text-center">
-        <GradientOrbs preset="card" />
+      <div className="relative overflow-hidden rounded-xxl border border-hairline-soft bg-canvas-soft px-5 py-9 text-center">
         <div className="relative z-10">
           <p className="font-display text-xl text-ink">The places that matter</p>
           <p className="mx-auto mt-2 max-w-[28ch] text-sm text-muted">

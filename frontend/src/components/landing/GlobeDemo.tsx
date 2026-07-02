@@ -95,7 +95,7 @@ export function GlobeDemo() {
   const ready = inView && size.width > 0 && size.height > 0;
 
   return (
-    <Section id="globe" orbs="preview">
+    <Section id="globe">
       {/* Intro + the live "try it from your home" search. */}
       <div className="flex max-w-2xl flex-col items-start gap-4">
         <SectionLabel>{globe.eyebrow}</SectionLabel>

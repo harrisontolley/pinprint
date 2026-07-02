@@ -37,7 +37,7 @@ export default function CompareHubPage() {
     <main className="bg-canvas text-body">
       <SiteHeader />
 
-      <Section orbs="preview">
+      <Section>
         <div className="flex flex-col gap-12">
           <header className="flex max-w-[680px] flex-col gap-4">
             <SectionLabel>Compare</SectionLabel>

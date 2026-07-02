@@ -3,7 +3,6 @@
 import { type MouseEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GradientOrbs } from "@/components/ui/GradientOrbs";
 import { ConfirmDialog } from "@/components/ui/Dialog";
 import { AccountNav } from "@/components/account/AccountNav";
 import { CartNav } from "@/components/cart/CartNav";
@@ -49,7 +48,6 @@ export function StudioHeader({ className = "" }: { className?: string }) {
     <header
       className={`relative z-20 shrink-0 overflow-hidden border-b border-hairline bg-canvas ${className}`}
     >
-      <GradientOrbs preset="header" />
       <div className="relative z-10 flex items-center justify-between gap-4 px-5 py-3">
         <div className="flex items-baseline gap-3">
           <Link

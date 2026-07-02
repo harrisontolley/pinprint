@@ -6,7 +6,7 @@ import { copy, STUDIO_HREF } from "./copy";
 export function FinalCTA() {
   const { finalCta } = copy;
   return (
-    <Section orbs="card">
+    <Section>
       <div className="mx-auto flex max-w-[40ch] flex-col items-center gap-6 text-center">
         <h2 className="font-display text-[clamp(1.75rem,4.5vw,40px)] font-normal leading-[1.13] tracking-[-0.96px] text-ink">
           {finalCta.headline}

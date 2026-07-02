@@ -1,18 +1,14 @@
 import type { ReactNode } from "react";
-import { GradientOrbs } from "@/components/ui/GradientOrbs";
 
 /**
  * Band wrapper enforcing the editorial rhythm from DESIGN.md: 96px vertical
  * padding, 1200px max content width, consistent gutters. Optionally alternates
- * to the soft canvas tone and drops atmospheric gradient orbs behind the band.
+ * to the soft canvas tone.
  */
-
-type OrbPreset = "preview" | "header" | "sidebar" | "card";
 
 type Props = {
   id?: string;
   tone?: "canvas" | "soft";
-  orbs?: OrbPreset;
   /** Remove the max-width container (for full-bleed bands that center their own content). */
   bleed?: boolean;
   className?: string;
@@ -22,7 +18,6 @@ type Props = {
 export function Section({
   id,
   tone = "canvas",
-  orbs,
   bleed = false,
   className = "",
   children,
@@ -34,7 +29,6 @@ export function Section({
         tone === "soft" ? "bg-canvas-soft" : "bg-canvas"
       } ${className}`}
     >
-      {orbs && <GradientOrbs preset={orbs} />}
       <div
         className={
           bleed

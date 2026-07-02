@@ -8,7 +8,7 @@ import { copy, STUDIO_HREF } from "./copy";
 export function Hero() {
   const { hero } = copy;
   return (
-    <Section orbs="preview" className="pt-32 md:pt-40">
+    <Section className="pt-32 md:pt-40">
       <div id="top" className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col items-start gap-6">
           <SectionLabel>{hero.eyebrow}</SectionLabel>

@@ -45,7 +45,7 @@ export function ComparePageLayout({ competitor: c }: { competitor: Competitor })
       <SiteHeader />
 
       {/* Hero */}
-      <Section orbs="preview">
+      <Section>
         <div className="flex flex-col gap-6">
           <nav
             aria-label="Breadcrumb"

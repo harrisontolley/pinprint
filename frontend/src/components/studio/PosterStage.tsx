@@ -2,16 +2,15 @@
 
 import type { RefObject } from "react";
 import { Poster } from "@/components/poster/Poster";
-import { GradientOrbs } from "@/components/ui/GradientOrbs";
 import type { LaidOut } from "@/lib/layout/types";
 import type { TemplateSpec } from "@/lib/templates/types";
 import type { DisplayOptions } from "@/lib/templates/customize";
 import type { Place, Units } from "@/lib/types";
 
 /**
- * The hero: the live poster floating on an orb-lit stage. The atmospheric
- * gradient orbs bloom only here (DESIGN.md) so nothing competes with the poster.
- * posterRef wraps the card so export can read the live <svg>.
+ * The hero: the live poster hung on a quiet gallery wall — soft ivory backdrop,
+ * a single deep shadow under the print, nothing competing with the artwork
+ * (DESIGN.md). posterRef wraps the card so export can read the live <svg>.
  */
 export function PosterStage({
   home,
@@ -45,9 +44,8 @@ export function PosterStage({
 }) {
   return (
     <div
-      className={`relative flex items-center justify-center p-4 sm:p-6 lg:p-10 ${className}`}
+      className={`relative flex items-center justify-center bg-canvas-soft p-4 sm:p-6 lg:p-10 ${className}`}
     >
-      <GradientOrbs preset="preview" />
       {sample && (
         <span className="absolute left-4 top-4 z-20 rounded-pill bg-ink/75 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-on-primary backdrop-blur sm:left-6 sm:top-6 lg:left-10 lg:top-10">
           Example
