@@ -6,7 +6,7 @@ import { copy } from "./copy";
 export function SiteFooter() {
   const { footer, brand } = copy;
   return (
-    <footer className="border-t border-hairline bg-canvas">
+    <footer id="site-footer" className="border-t border-hairline bg-canvas">
       <div className="container-page grid gap-12 py-16 md:grid-cols-[1.4fr_repeat(4,1fr)]">
         <div className="flex flex-col gap-3">
           <span className="font-display text-2xl font-normal tracking-[-0.32px] text-ink">

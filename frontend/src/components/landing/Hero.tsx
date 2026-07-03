@@ -23,11 +23,18 @@ function HeroCopy() {
         {hero.headline}
       </h1>
       <p className="max-w-[52ch] text-copy text-body">{hero.subhead}</p>
-      <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:gap-6">
-        <LinkButton href={STUDIO_HREF} variant="primary" size="md">
+      <div className="flex w-full flex-col gap-4 pt-2 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
+        <LinkButton
+          href={STUDIO_HREF}
+          variant="primary"
+          size="md"
+          className="w-full sm:w-auto"
+        >
           {hero.primaryCta}
         </LinkButton>
-        <TextLink href="#how-it-works">{hero.secondaryCta}</TextLink>
+        <TextLink href="#how-it-works" className="self-start sm:self-auto">
+          {hero.secondaryCta}
+        </TextLink>
       </div>
       <div className="flex flex-col gap-2">
         <SectionLabel>{hero.specLine}</SectionLabel>
@@ -66,12 +73,18 @@ export function Hero() {
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-[65%_center] lg:object-center"
         />
         {/* Soft ivory wash keeps overlaid copy readable at every crop. */}
         <div
           aria-hidden
           className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,248,243,0.9)_0%,rgba(250,248,243,0.6)_38%,rgba(250,248,243,0.12)_62%)]"
+        />
+        {/* On the stacked layout the copy sits low over an un-washed region;
+            fade the bottom into canvas so it stays readable on tall phones. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-canvas via-canvas/80 to-transparent lg:hidden"
         />
       </div>
 
@@ -85,10 +98,12 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Stacked (below lg): framed print centered over the wall, copy below. */}
+      {/* Stacked (below lg): framed print centered over the wall, copy below.
+          Tight vertical padding keeps poster + headline + CTA near one phone
+          viewport. */}
       <div className="relative lg:hidden">
-        <div className="flex items-center justify-center px-6 py-16">
-          <FramedPrint className="w-[min(70vw,360px)]" />
+        <div className="flex items-center justify-center px-6 pb-8 pt-10">
+          <FramedPrint className="w-[min(72vw,380px)]" />
         </div>
         <div className="container-page pb-14">
           <HeroCopy />

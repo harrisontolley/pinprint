@@ -156,7 +156,7 @@ export function GlobeDemo() {
         {/* Square box reserves height so the late mount causes no layout shift. */}
         <div
           ref={wrapRef}
-          className="relative mx-auto aspect-square w-full max-w-[560px]"
+          className="relative mx-auto aspect-square w-full max-w-[560px] max-md:max-w-[min(72vw,400px)]"
           aria-hidden
         >
           {/* Soft contact shadow grounds the (transparent-background) globe. */}

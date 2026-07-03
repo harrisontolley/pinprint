@@ -9,7 +9,7 @@ import { copy, STUDIO_HREF } from "./copy";
 export function FinalCTA() {
   const { finalCta } = copy;
   return (
-    <Section tone="soft">
+    <Section id="final-cta" tone="soft">
       <div className="mx-auto flex max-w-[44ch] flex-col items-center gap-6 text-center">
         <h2 className="font-display text-title font-normal text-ink">
           {finalCta.headline}
