@@ -33,6 +33,14 @@ type Composite = {
    * artwork (the part eyes land on) stays pixel-crisp.
    */
   upscale?: number;
+  /**
+   * Optional fraction (of height) to shift the whole scene DOWN: the top edge
+   * is extended with a mirrored, blurred strip of wall and the same amount is
+   * cropped off the bottom, so dimensions stay identical. Used to seat the
+   * framed poster on the page's visual midline; `object-position` can't do
+   * this because the full-bleed hero has no vertical crop slack.
+   */
+  shiftDown?: number;
 };
 
 const SCENES: Composite[] = [
@@ -42,6 +50,7 @@ const SCENES: Composite[] = [
     scene: "scene-hero-wide-raw.png",
     poster: "hero-poster",
     upscale: 2,
+    shiftDown: 0.06,
   },
   { out: "scene-gift", scene: "scene-gift-raw.png", poster: "story-the-honeymoon" },
   { out: "scene-craft", scene: "scene-craft-raw.png", poster: null },
@@ -124,7 +133,7 @@ function innerShadowSvg(w: number, h: number): Buffer {
   );
 }
 
-async function composeOne({ out, scene, poster, upscale }: Composite) {
+async function composeOne({ out, scene, poster, upscale, shiftDown }: Composite) {
   const scenePath = path.join(SCENES_DIR, scene);
   let sceneBuf: Buffer = await readFile(scenePath);
   if (upscale && upscale > 1) {
@@ -134,6 +143,31 @@ async function composeOne({ out, scene, poster, upscale }: Composite) {
         kernel: "lanczos3",
       })
       .sharpen({ sigma: 0.8 })
+      .toBuffer();
+  }
+  if (shiftDown && shiftDown > 0) {
+    const meta = await sharp(sceneBuf).metadata();
+    const w = meta.width ?? 0;
+    const h = meta.height ?? 0;
+    const pad = Math.round(h * shiftDown);
+    // Mirrored strip of the top rows, flipped and softened, becomes the new
+    // ceiling-side wall; the same height comes off the bottom.
+    const topStrip = await sharp(sceneBuf)
+      .extract({ left: 0, top: 0, width: w, height: pad })
+      .flip()
+      .blur(6)
+      .toBuffer();
+    const body = await sharp(sceneBuf)
+      .extract({ left: 0, top: 0, width: w, height: h - pad })
+      .toBuffer();
+    sceneBuf = await sharp({
+      create: { width: w, height: h, channels: 3, background: "#f0ead9" },
+    })
+      .composite([
+        { input: topStrip, left: 0, top: 0 },
+        { input: body, left: 0, top: pad },
+      ])
+      .png()
       .toBuffer();
   }
   const base = sharp(sceneBuf);
