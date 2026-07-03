@@ -50,8 +50,8 @@ function FramedPrint({ className = "" }: { className?: string }) {
     <Image
       src={framed.src}
       alt={framed.alt}
-      width={1319}
-      height={1933}
+      width={2639}
+      height={3867}
       priority
       sizes="(min-width: 1024px) 30vw, 70vw"
       className={`h-auto drop-shadow-print ${className}`}

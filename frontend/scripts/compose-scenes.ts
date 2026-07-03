@@ -49,6 +49,13 @@ type Composite = {
    * wall shadow is applied in CSS, not baked.
    */
   cropToFrame?: boolean;
+  /**
+   * Skip palette quantization on the final PNG. Use for outputs blown up
+   * full-bleed (e.g. the hero print) where 256-color banding is visible on
+   * smooth gradients; costs file size, which is fine off the critical path
+   * since Next.js `<Image>` re-encodes to right-sized WebP/AVIF for delivery.
+   */
+  truecolor?: boolean;
 };
 
 const SCENES: Composite[] = [
@@ -62,8 +69,10 @@ const SCENES: Composite[] = [
     poster: "hero-poster",
     cropToFrame: true,
     // The oak shell is only ~660px wide in the raw; scale it up before the
-    // native-resolution poster lands inside so the element stays crisp at 2x DPR.
-    upscale: 2,
+    // native-resolution poster lands inside so the element stays crisp at
+    // high DPR / browser zoom.
+    upscale: 4,
+    truecolor: true,
   },
   { out: "scene-gift", scene: "scene-gift-raw.png", poster: "story-the-honeymoon" },
   { out: "scene-craft", scene: "scene-craft-raw.png", poster: null },
@@ -187,6 +196,7 @@ async function composeOne({
   upscale,
   shiftDown,
   cropToFrame,
+  truecolor,
 }: Composite) {
   const scenePath = path.join(SCENES_DIR, scene);
   let sceneBuf: Buffer = await readFile(scenePath);
@@ -271,7 +281,11 @@ async function composeOne({
   }
 
   const png = await composed
-    .png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 })
+    .png(
+      truecolor
+        ? { quality: 100, effort: 10, compressionLevel: 9 }
+        : { palette: true, quality: 90, effort: 10, compressionLevel: 9 },
+    )
     .toBuffer();
   await writeFile(path.join(OUT_DIR, `${out}.png`), png);
   console.log(`${out}.png (${(png.length / 1024).toFixed(0)} KB)`);

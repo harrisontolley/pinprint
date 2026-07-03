@@ -59,6 +59,14 @@ async function renderOne(
   base: string,
   slug: string,
 ): Promise<{ png: Buffer; svg?: string }> {
+  // The hero poster is rasterized standalone at native/near-native size in
+  // the landing hero (see scripts/compose-scenes.ts), so it gets a higher
+  // scale and skips palette quantization to avoid banding on the smooth
+  // paper-tone gradient. Every other preset stays palette-quantized at the
+  // default scale — see the comment below on why (noise-texture looks).
+  const hiFi = slug === "hero-poster";
+  const scale = hiFi ? 3 : SCALE; // hero-poster: 1000x1500 -> 3000x4500
+
   const page = await browser.newPage({ viewport: { width: 1000, height: 1500 } });
   try {
     await page.goto(`${base}/render/${slug}`, { waitUntil: "networkidle" });
@@ -100,14 +108,20 @@ async function renderOne(
       } finally {
         URL.revokeObjectURL(url);
       }
-    }, SCALE);
+    }, scale);
 
     const raw = Buffer.from(pngDataUrl.split(",")[1], "base64");
     // Palette-quantise: crushes the noise-texture posters (paper grain) from
     // ~8MB to a few hundred KB with no visible loss at landing-card sizes,
-    // while flat templates stay crisp.
+    // while flat templates stay crisp. The hero poster skips this (see
+    // `hiFi` above) since it's blown up full-bleed in the landing hero and
+    // quantization banding is visible there.
     const png = await sharp(raw)
-      .png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 })
+      .png(
+        hiFi
+          ? { quality: 100, effort: 10, compressionLevel: 9 }
+          : { palette: true, quality: 90, effort: 10, compressionLevel: 9 },
+      )
       .toBuffer();
     return EMIT_SVG ? { png, svg } : { png };
   } finally {
