@@ -6,6 +6,7 @@ import { GlobeDemo } from "./GlobeDemo";
 import { CraftSection } from "./CraftSection";
 import { StyleGallery } from "./StyleGallery";
 import { Stories } from "./Stories";
+import { GiftSection } from "./GiftSection";
 import { PricingPreview } from "./PricingPreview";
 import { FAQ } from "./FAQ";
 import { FinalCTA } from "./FinalCTA";
@@ -33,6 +34,7 @@ export function LandingPage() {
       <CraftSection />
       <StyleGallery />
       <Stories />
+      <GiftSection />
       <PricingPreview />
       <FAQ />
       <FinalCTA />

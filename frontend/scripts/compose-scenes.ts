@@ -26,10 +26,23 @@ type Composite = {
   scene: string;
   /** Poster slug under public/showcase, or null for scenes used as-is. */
   poster: string | null;
+  /**
+   * Optional integer upscale applied to the scene BEFORE compositing. The
+   * generator caps out around 1.5K wide; for full-bleed uses we lanczos the
+   * scene up and then composite the native-resolution poster render, so the
+   * artwork (the part eyes land on) stays pixel-crisp.
+   */
+  upscale?: number;
 };
 
 const SCENES: Composite[] = [
   { out: "scene-hero", scene: "scene-hero-raw.png", poster: "hero-poster" },
+  {
+    out: "scene-hero-wide",
+    scene: "scene-hero-wide-raw.png",
+    poster: "hero-poster",
+    upscale: 2,
+  },
   { out: "scene-gift", scene: "scene-gift-raw.png", poster: "story-the-honeymoon" },
   { out: "scene-craft", scene: "scene-craft-raw.png", poster: null },
 ];
@@ -111,16 +124,46 @@ function innerShadowSvg(w: number, h: number): Buffer {
   );
 }
 
-async function composeOne({ out, scene, poster }: Composite) {
+async function composeOne({ out, scene, poster, upscale }: Composite) {
   const scenePath = path.join(SCENES_DIR, scene);
-  const base = sharp(await readFile(scenePath));
+  let sceneBuf: Buffer = await readFile(scenePath);
+  if (upscale && upscale > 1) {
+    const meta = await sharp(sceneBuf).metadata();
+    sceneBuf = await sharp(sceneBuf)
+      .resize((meta.width ?? 0) * upscale, (meta.height ?? 0) * upscale, {
+        kernel: "lanczos3",
+      })
+      .sharpen({ sigma: 0.8 })
+      .toBuffer();
+  }
+  const base = sharp(sceneBuf);
 
   let composed: Sharp;
   if (poster) {
     const rect = await findBlackRect(base);
-    const posterBuf = await sharp(path.join(OUT_DIR, `${poster}.png`))
-      .resize(rect.width, rect.height, { fit: "cover", position: "centre" })
-      .toBuffer();
+    // Posters are 2:3 but the AI frames only approximate it. Near-ratio frames
+    // get a stretch-to-fill (imperceptible under ~6%); wider frames get a
+    // contain-fit padded with the poster's own paper color, which reads as the
+    // artwork's margin rather than a crop that beheads the title block.
+    const posterPath = path.join(OUT_DIR, `${poster}.png`);
+    const target = 2 / 3;
+    const actual = rect.width / rect.height;
+    const nearRatio = Math.abs(actual - target) / target < 0.06;
+    let posterBuf: Buffer;
+    if (nearRatio) {
+      posterBuf = await sharp(posterPath)
+        .resize(rect.width, rect.height, { fit: "fill" })
+        .toBuffer();
+    } else {
+      const { data } = await sharp(posterPath)
+        .extract({ left: 4, top: 4, width: 1, height: 1 })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const paper = { r: data[0], g: data[1], b: data[2], alpha: 1 };
+      posterBuf = await sharp(posterPath)
+        .resize(rect.width, rect.height, { fit: "contain", background: paper })
+        .toBuffer();
+    }
     composed = base.composite([
       { input: posterBuf, left: rect.left, top: rect.top },
       {

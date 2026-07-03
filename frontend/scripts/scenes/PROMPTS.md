@@ -33,6 +33,36 @@ Generated with `google/gemini-3-pro-image-preview` via OpenRouter
 > shallow depth of field, photorealistic product photography, calm and
 > luxurious, landscape 3:2.
 
+## scene-hero-close-raw.png
+
+Close-up frame scene (kept for reference; the shipped hero uses the wide scene below).
+
+> Interior photograph, close view of a large empty picture frame hanging on a
+> warm ivory plaster wall, the frame filling about two thirds of the image.
+> The frame is thin natural oak, portrait orientation, 2:3 aspect ratio,
+> photographed perfectly straight-on with no perspective distortion, frame
+> edges perfectly vertical and horizontal. The entire area inside the frame is
+> a single uniform pure black rectangle, completely flat solid black with no
+> mat, no border, no reflections and no texture inside the frame. At the right
+> edge of the image, part of a light oak sideboard with a ceramic vase of
+> dried grasses. Soft warm morning side light casts a gentle shadow from the
+> frame onto the wall. Cream and clay palette, photorealistic, landscape 3:2
+> composition with the frame just left of center.
+
+## scene-hero-wide-raw.png
+
+The shipped hero: panoramic wall, copy overlays the empty left two-thirds. Composited at 2x lanczos upscale so the wall stays sharp full-bleed; the poster is composited at native render resolution.
+
+> Very wide interior photograph of a warm, quiet living room wall in soft
+> morning light, panoramic 21:9 composition. On the right third hangs a large
+> picture frame: thin natural oak, portrait orientation, 2:3 aspect ratio,
+> photographed perfectly straight-on with no perspective distortion, the area
+> inside the frame solid pure black with no mat. The left two thirds of the
+> image is calm, empty warm ivory plaster wall with soft light gradation,
+> above a long light oak sideboard running the full width with a ceramic vase,
+> a stack of art books and dried grasses near the right. Warm cream and clay
+> palette, fine-art gallery calm, photorealistic.
+
 ## scene-room-raw.png (published as-is at /showcase/room-study.png)
 
 Used by `LandingPoster.tsx` as the live-mockup room: the LIVE poster SVG is

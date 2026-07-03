@@ -40,12 +40,14 @@ export const copy = {
       "Set where home is, then add the places you were born, lived, visited, or have family. Pinprint draws an arrow to each one, pointing exactly where it really is, with the true distance beside it. Then we print it on gallery paper and send it to your door.",
     primaryCta: PRIMARY_CTA,
     secondaryCta: "See how it works",
+    // Quiet materials line under the CTAs: the upmarket signal is the spec.
+    specLine: "Hahnemühle 310gsm · archival giclée · solid oak frames",
     reassurance: "Free to design. Pay only when you print.",
     media: {
-      label: "A framed Pinprint hung above an oak sideboard",
-      aspect: "3 / 2",
-      src: "/showcase/scene-hero.png",
-      alt: "Framed warm-minimal Pinprint of San Francisco hanging on an ivory wall above an oak sideboard, next to a linen armchair",
+      label: "A framed Pinprint on a panoramic living room wall",
+      aspect: "33 / 14",
+      src: "/showcase/scene-hero-wide.png",
+      alt: "Framed warm-minimal Pinprint of San Francisco hanging on a warm ivory wall above a long oak sideboard",
     },
   },
 
@@ -168,6 +170,30 @@ export const copy = {
     ],
   },
 
+  // The gifting beat: the product's most common purchase is for someone else.
+  gift: {
+    eyebrow: "The gift",
+    headline: "Made to be given.",
+    body: [
+      "The hardest people to buy for already own everything except this. A Pinprint is their story, drawn from real coordinates: where they started, where they went, where home is now.",
+      "It arrives ready to give. A solid oak frame, wired for the wall, in protective packaging that opens well.",
+    ],
+    occasions: [
+      "Weddings and anniversaries",
+      "A new home",
+      "Leaving for college",
+      "Retirement",
+      "Mother's and Father's Day",
+    ],
+    cta: "Make one for someone",
+    media: {
+      label: "A framed Pinprint leaning on a wall beside wrapping paper",
+      aspect: "3 / 2",
+      src: "/showcase/scene-gift.png",
+      alt: "Framed celestial Pinprint of Seattle leaning against an ivory wall next to kraft wrapping paper and twine",
+    },
+  },
+
   pricingPreview: {
     eyebrow: "Pricing",
     headline: "Priced like the object it is.",
@@ -281,14 +307,8 @@ export const copy = {
   finalCta: {
     headline: "Put your places on the wall.",
     subhead:
-      "Designing is free and takes about five minutes. Pay only when you print.",
+      "For your own wall, or for someone you love. Designing is free and takes about five minutes.",
     cta: PRIMARY_CTA,
-    media: {
-      label: "A framed Pinprint leaning on a wall beside wrapping paper",
-      aspect: "3 / 2",
-      src: "/showcase/scene-gift.png",
-      alt: "Framed celestial Pinprint of Seattle leaning against an ivory wall next to kraft wrapping paper and twine",
-    },
   },
 
   footer: {
