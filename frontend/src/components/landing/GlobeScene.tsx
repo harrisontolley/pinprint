@@ -124,7 +124,10 @@ export default function GlobeScene({
   places,
 }: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
-  const mountedRef = useRef(true);
+  // Starts false so callbacks fired synchronously during the first render
+  // (react-globe's onGlobeReady) can't set state before the mount commit;
+  // the mount effect below flips it true.
+  const mountedRef = useRef(false);
   const [ready, setReady] = useState(false);
   const { arcs, points } = useMemo(
     () => buildGlobeData(home, places),
