@@ -182,7 +182,7 @@ export default function CartPage() {
                               aria-label="Decrease quantity"
                               onClick={() => setQuantity(item.id, item.quantity - 1)}
                               disabled={item.quantity <= 1}
-                              className="flex size-8 items-center justify-center rounded-pill text-ink transition-colors hover:bg-surface-strong disabled:opacity-30"
+                              className="flex size-8 items-center justify-center rounded-pill text-ink transition-colors hover:bg-surface-strong disabled:opacity-30 pointer-coarse:size-11"
                             >
                               −
                             </button>
@@ -193,7 +193,7 @@ export default function CartPage() {
                               type="button"
                               aria-label="Increase quantity"
                               onClick={() => setQuantity(item.id, item.quantity + 1)}
-                              className="flex size-8 items-center justify-center rounded-pill text-ink transition-colors hover:bg-surface-strong"
+                              className="flex size-8 items-center justify-center rounded-pill text-ink transition-colors hover:bg-surface-strong pointer-coarse:size-11"
                             >
                               +
                             </button>
@@ -201,7 +201,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() => removeItem(item.id)}
-                            className="text-sm text-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
+                            className="text-sm text-muted underline-offset-2 transition-colors hover:text-ink hover:underline pointer-coarse:-my-2.5 pointer-coarse:py-2.5"
                           >
                             Remove
                           </button>
@@ -257,7 +257,7 @@ export default function CartPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="h-10 rounded-md border border-hairline-strong bg-canvas px-3 text-sm text-ink outline-none focus:border-ink"
+                    className="h-11 rounded-md border border-hairline-strong bg-canvas px-3 text-[16px] text-ink outline-none focus:border-ink"
                   />
                 </label>
               </SignedOut>

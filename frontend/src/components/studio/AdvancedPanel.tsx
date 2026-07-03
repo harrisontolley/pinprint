@@ -51,7 +51,7 @@ function ColorRow({
         {value && (
           <button
             onClick={() => onChange(null)}
-            className="cursor-pointer text-[10px] text-muted transition-colors hover:text-ink"
+            className="cursor-pointer text-[11px] text-muted transition-colors hover:text-ink pointer-coarse:-my-1.5 pointer-coarse:py-1.5 pointer-coarse:text-xs"
           >
             reset
           </button>
@@ -61,7 +61,7 @@ function ColorRow({
           value={value ?? fallback}
           onChange={(e) => onChange(e.target.value)}
           aria-label={label}
-          className="h-6 w-9 cursor-pointer rounded-sm border border-hairline-strong bg-surface-card p-0.5"
+          className="h-6 w-9 cursor-pointer rounded-sm border border-hairline-strong bg-surface-card p-0.5 pointer-coarse:h-9 pointer-coarse:w-14"
         />
       </div>
     </div>
@@ -78,12 +78,12 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2 text-xs text-body">
+    <label className="flex cursor-pointer items-center gap-2 text-xs text-body pointer-coarse:min-h-10 pointer-coarse:text-sm">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-3.5 w-3.5 cursor-pointer rounded-xs border-hairline-strong accent-ink"
+        className="h-3.5 w-3.5 cursor-pointer rounded-xs border-hairline-strong accent-ink pointer-coarse:size-5"
       />
       {label}
     </label>
@@ -109,7 +109,7 @@ function TextRow({
         value={value ?? ""}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value || null)}
-        className="mt-1 w-full rounded-md border border-hairline-strong bg-surface-card px-2.5 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-muted-soft focus:border-ink focus:ring-1 focus:ring-ink"
+        className="mt-1 w-full rounded-md border border-hairline-strong bg-surface-card px-2.5 py-1.5 text-[16px] text-ink outline-none transition-colors placeholder:text-muted-soft focus:border-ink focus:ring-1 focus:ring-ink"
       />
     </label>
   );
@@ -153,7 +153,7 @@ function ColorwayChip({
         <span className="h-3 w-3 rounded-full" style={{ background: ink }} />
         <span className="h-3 w-3 rounded-full" style={{ background: accent }} />
       </span>
-      <span className="mt-1.5 block truncate text-[10px] font-medium text-body">
+      <span className="mt-1.5 block truncate text-[11px] font-medium text-body pointer-coarse:text-xs">
         {name}
       </span>
     </button>
@@ -191,7 +191,7 @@ function FontTile({
         Aa
       </span>
       <span
-        className="mt-1.5 block truncate text-[11px] font-medium text-ink"
+        className="mt-1.5 block truncate text-[11px] font-medium text-ink pointer-coarse:text-xs"
         style={{ fontFamily: nameFamily }}
       >
         {name}
@@ -265,7 +265,7 @@ export function AdvancedPanel() {
       {/* Colour — primary lever */}
       <section className="flex flex-col gap-2.5 border-b border-hairline pb-5">
         <Heading>Colour</Heading>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <ColorwayChip
             name="Original"
             paper={base.paper}
@@ -328,7 +328,7 @@ export function AdvancedPanel() {
       {/* Type — primary lever */}
       <section className="flex flex-col gap-2.5 border-b border-hairline py-5">
         <Heading>Type</Heading>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <FontTile
             name="Original"
             hint="the look's own"

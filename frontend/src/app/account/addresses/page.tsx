@@ -161,7 +161,7 @@ function Field({
     <label className={`flex flex-col gap-1 ${className}`}>
       <span className="text-xs text-muted">{label}</span>
       <input
-        className="h-10 rounded-md border border-hairline-strong bg-canvas px-3 text-sm text-ink outline-none focus:border-ink"
+        className="h-11 rounded-md border border-hairline-strong bg-canvas px-3 text-[16px] text-ink outline-none focus:border-ink"
         {...props}
       />
     </label>

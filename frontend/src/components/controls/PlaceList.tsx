@@ -78,7 +78,7 @@ export function NameField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={ariaLabel}
-        className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none"
+        className="min-w-0 flex-1 bg-transparent text-[16px] font-medium text-ink outline-none"
       />
       <PencilGlyph />
     </span>
@@ -102,7 +102,7 @@ function IconButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-soft transition-colors hover:bg-surface-strong ${
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-soft transition-colors hover:bg-surface-strong pointer-coarse:h-10 pointer-coarse:w-10 ${
         danger ? "hover:text-error" : "hover:text-ink"
       }`}
     >

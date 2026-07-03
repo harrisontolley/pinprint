@@ -45,7 +45,7 @@ export function WizardProgress({
                   disabled={!reachable}
                   aria-current={isActive ? "step" : undefined}
                   aria-label={`Step ${i + 1}: ${s.label}`}
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-pill border text-xs font-semibold transition-colors disabled:cursor-default ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-pill border text-xs font-semibold transition-colors disabled:cursor-default pointer-coarse:h-9 pointer-coarse:w-9 ${
                     isActive || isDone
                       ? "border-primary bg-primary text-on-primary"
                       : reachable

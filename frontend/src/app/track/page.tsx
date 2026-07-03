@@ -66,7 +66,7 @@ export default function TrackPage() {
                 onChange={(e) => setOrderNumber(e.target.value)}
                 placeholder="PP-XXXXXX"
                 required
-                className="h-10 rounded-md border border-hairline-strong bg-canvas px-3 text-sm text-ink outline-none focus:border-ink"
+                className="h-11 rounded-md border border-hairline-strong bg-canvas px-3 text-[16px] text-ink outline-none focus:border-ink"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -77,7 +77,7 @@ export default function TrackPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="h-10 rounded-md border border-hairline-strong bg-canvas px-3 text-sm text-ink outline-none focus:border-ink"
+                className="h-11 rounded-md border border-hairline-strong bg-canvas px-3 text-[16px] text-ink outline-none focus:border-ink"
               />
             </label>
             <Button type="submit" disabled={status === "loading"}>

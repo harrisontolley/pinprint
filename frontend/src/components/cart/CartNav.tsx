@@ -19,7 +19,7 @@ export function CartNav({ className = "" }: { className?: string }) {
     <Link
       href="/cart"
       aria-label={show ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}
-      className={`relative flex size-10 items-center justify-center rounded-pill text-ink transition-colors hover:bg-surface-strong ${className}`}
+      className={`relative flex size-10 items-center justify-center rounded-pill pointer-coarse:size-11 text-ink transition-colors hover:bg-surface-strong ${className}`}
     >
       <svg
         className="h-5 w-5"

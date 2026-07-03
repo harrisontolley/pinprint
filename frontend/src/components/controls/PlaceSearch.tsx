@@ -112,7 +112,7 @@ export function PlaceSearch({
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
-          className="h-11 w-full rounded-md border border-hairline-strong bg-surface-card pl-9 pr-3.5 text-sm text-ink outline-none transition-colors placeholder:text-muted-soft focus:border-ink focus:ring-1 focus:ring-ink"
+          className="h-11 w-full rounded-md border border-hairline-strong bg-surface-card pl-9 pr-3.5 text-[16px] text-ink outline-none transition-colors placeholder:text-muted-soft focus:border-ink focus:ring-1 focus:ring-ink"
         />
       </div>
       {show && (

@@ -157,7 +157,7 @@ export function FreeDesignForm({
           placeholder="you@example.com"
           required
           disabled={status === "submitting"}
-          className="h-10 rounded-md border border-hairline-strong bg-canvas px-3 text-sm text-ink outline-none focus:border-ink disabled:opacity-60"
+          className="h-11 rounded-md border border-hairline-strong bg-canvas px-3 text-[16px] text-ink outline-none focus:border-ink disabled:opacity-60"
         />
       </label>
 
