@@ -48,7 +48,13 @@ export function GiftSection() {
           </ul>
 
           <div className="pt-2">
-            <LinkButton href={STUDIO_HREF} variant="outline" size="md">
+            <LinkButton
+              href={STUDIO_HREF}
+              variant="outline"
+              size="md"
+              trackId="gift_section"
+              trackLocation="gift_section"
+            >
               {gift.cta}
             </LinkButton>
           </div>
