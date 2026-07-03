@@ -149,7 +149,7 @@ export const copy = {
         title: "Where it started",
         caption: "Born in Memphis, met in Chicago, still measuring everything from Kansas City.",
         src: "/showcase/story-where-it-started.png",
-        alt: "Heirloom-style Pinprint centered on Kansas City",
+        alt: "Mid-Century-style Pinprint centered on Kansas City",
       },
       {
         title: "The honeymoon",
