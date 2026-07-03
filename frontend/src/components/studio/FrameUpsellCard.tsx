@@ -1,19 +1,23 @@
 "use client";
 
 import { usePosterStore } from "@/lib/store/posterStore";
-import { formatUsd } from "@/lib/commerce/price";
+import { formatUsd, DEFAULT_FRAME_COLOR } from "@/lib/commerce/price";
 import { PRODUCTS_BY_ID } from "@/lib/commerce/printProducts";
 
 /**
- * The single ready-to-hang frame upsell. A checkbox card (ink-ring when on, same
- * language as the size cards) that adds the per-size frame upcharge to the total.
- * Rendered only on the print path — the parent gates on format === "print".
+ * The ready-to-hang frame upsell. A checkbox card (ink-ring when on, same
+ * language as the size cards) that adds the per-size frame upcharge to the
+ * total. Rendered only on the print path — the parent gates on
+ * format === "print". Material/color choice is a single default for now
+ * (Oak/Natural) — the 8-variant picker lands in a follow-up PR; this just
+ * keeps the toggle working against the new frame model in the meantime.
  */
 export function FrameUpsellCard() {
   const productId = usePosterStore((s) => s.productId);
-  const addFrame = usePosterStore((s) => s.addFrame);
-  const setAddFrame = usePosterStore((s) => s.setAddFrame);
+  const frame = usePosterStore((s) => s.frame);
+  const setFrame = usePosterStore((s) => s.setFrame);
   const product = PRODUCTS_BY_ID[productId];
+  const addFrame = frame !== null;
 
   return (
     <label
@@ -26,7 +30,9 @@ export function FrameUpsellCard() {
       <input
         type="checkbox"
         checked={addFrame}
-        onChange={(e) => setAddFrame(e.target.checked)}
+        onChange={(e) =>
+          setFrame(e.target.checked ? { material: "Oak", color: DEFAULT_FRAME_COLOR } : null)
+        }
         className="mt-0.5 h-4 w-4 cursor-pointer rounded-xs border-hairline-strong accent-ink"
       />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
