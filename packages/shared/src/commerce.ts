@@ -9,6 +9,15 @@
 
 import type { OrderStatus } from "./orders.js";
 
+/**
+ * Name for the damage/fault guarantee. Surfaced on the landing page, the
+ * dedicated /guarantee page (frontend/src/components/landing/copy.ts), and
+ * the order-confirmation email (backend/src/emails/orderConfirmation.ts) —
+ * lives here, not in either app, so the two customer-facing surfaces can
+ * never drift apart on the name of the same promise.
+ */
+export const GUARANTEE_NAME = "The Arrives Perfect Guarantee";
+
 // ── Tunable money (the single place to reprice) ──────────────────────────────
 
 /**

@@ -15,11 +15,15 @@ import {
 // no-op-when-unconfigured behavior (no DATABASE_URL in the hermetic test env, so
 // order lookups return null and the handlers don't throw).
 
-// The paid-transition hook-in (submitOrderToArtelo + deliverDigitalFiles) needs a
-// "found, pending_payment" order to reach those calls at all — a real DB lookup
-// no-ops in the hermetic test env above — so it's covered separately with the
-// order lookup/advance mocked and the two fire-and-forget collaborators spied on.
+// The paid-transition hook-in (submitOrderToArtelo + deliverDigitalFiles +
+// sendOrderConfirmationEmail) needs a "found, pending_payment" order to reach
+// those calls at all — a real DB lookup no-ops in the hermetic test env above
+// — so it's covered separately with the order lookup/advance mocked and the
+// fire-and-forget collaborators spied on. Same for the Artelo shipped/delivered
+// hook-in (sendShipmentNotificationEmail), which needs a "found" order via
+// findOrderByArteloId.
 const findOrderById = vi.fn();
+const findOrderByArteloId = vi.fn();
 const advanceOrderStatus = vi.fn();
 const applyCheckoutDetails = vi.fn();
 vi.mock("./orders.js", async (importOriginal) => {
@@ -27,6 +31,7 @@ vi.mock("./orders.js", async (importOriginal) => {
   return {
     ...actual,
     findOrderById: (...args: unknown[]) => findOrderById(...args),
+    findOrderByArteloId: (...args: unknown[]) => findOrderByArteloId(...args),
     advanceOrderStatus: (...args: unknown[]) => advanceOrderStatus(...args),
     applyCheckoutDetails: (...args: unknown[]) => applyCheckoutDetails(...args),
   };
@@ -40,6 +45,13 @@ vi.mock("./fulfillment.js", () => ({
 const deliverDigitalFiles = vi.fn();
 vi.mock("./digitalDelivery.js", () => ({
   deliverDigitalFiles: (...args: unknown[]) => deliverDigitalFiles(...args),
+}));
+
+const sendOrderConfirmationEmail = vi.fn();
+const sendShipmentNotificationEmail = vi.fn();
+vi.mock("./orderEmails.js", () => ({
+  sendOrderConfirmationEmail: (...args: unknown[]) => sendOrderConfirmationEmail(...args),
+  sendShipmentNotificationEmail: (...args: unknown[]) => sendShipmentNotificationEmail(...args),
 }));
 
 const capturePostHogServerEvent = vi.fn();
@@ -170,7 +182,7 @@ describe("handleStripeEvent — unconfigured DB", () => {
   });
 });
 
-describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital delivery)", () => {
+describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital delivery + confirmation email)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     findOrderById.mockResolvedValue({ id: "ord-1", status: "pending_payment" });
@@ -178,6 +190,7 @@ describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital de
     applyCheckoutDetails.mockResolvedValue(undefined);
     submitOrderToArtelo.mockResolvedValue({ submitted: true });
     deliverDigitalFiles.mockResolvedValue({ delivered: true });
+    sendOrderConfirmationEmail.mockResolvedValue({ sent: true });
     capturePostHogServerEvent.mockResolvedValue(undefined);
   });
 
@@ -197,12 +210,13 @@ describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital de
     } as unknown as Stripe.Event;
   }
 
-  it("fires deliverDigitalFiles alongside submitOrderToArtelo once a session settles as paid", async () => {
+  it("fires deliverDigitalFiles and sendOrderConfirmationEmail alongside submitOrderToArtelo once a session settles as paid", async () => {
     const result = await handleStripeEvent(completedEvent());
     expect(result).toEqual({ handled: true, orderId: "ord-1" });
     expect(advanceOrderStatus).toHaveBeenCalledWith("ord-1", "paid", expect.any(Object));
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
   });
 
   it("also fires on the async-payment-succeeded parity path", async () => {
@@ -212,12 +226,14 @@ describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital de
     } as unknown as Stripe.Event);
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
   });
 
-  it("does not fire delivery when the session hasn't actually settled (async, still unpaid)", async () => {
+  it("does not fire delivery or confirmation when the session hasn't actually settled (async, still unpaid)", async () => {
     await handleStripeEvent(completedEvent({ payment_status: "unpaid" }));
     expect(deliverDigitalFiles).not.toHaveBeenCalled();
     expect(submitOrderToArtelo).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmail).not.toHaveBeenCalled();
   });
 
   it("a rejected deliverDigitalFiles promise does not throw out of the handler (webhook isolation)", async () => {
@@ -228,15 +244,27 @@ describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital de
     });
   });
 
-  it("a rejected deliverDigitalFiles promise does not prevent the Artelo submission from firing", async () => {
+  it("a rejected deliverDigitalFiles promise does not prevent the Artelo submission or confirmation email from firing", async () => {
     deliverDigitalFiles.mockRejectedValue(new Error("resend blew up"));
     await handleStripeEvent(completedEvent());
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
   });
 
-  it("a rejected submitOrderToArtelo promise does not prevent digital delivery from firing", async () => {
+  it("a rejected submitOrderToArtelo promise does not prevent digital delivery or confirmation from firing", async () => {
     submitOrderToArtelo.mockRejectedValue(new Error("artelo blew up"));
     await handleStripeEvent(completedEvent());
+    expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
+  });
+
+  it("a rejected sendOrderConfirmationEmail promise does not prevent the other side effects from firing", async () => {
+    sendOrderConfirmationEmail.mockRejectedValue(new Error("resend blew up"));
+    await expect(handleStripeEvent(completedEvent())).resolves.toEqual({
+      handled: true,
+      orderId: "ord-1",
+    });
+    expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
   });
 
@@ -250,14 +278,16 @@ describe("handleStripeEvent — paid-transition hook-in (fulfilment + digital de
     });
     // Handler already resolved; none of the deferred side effects has run yet.
     expect(result).toEqual({ handled: true, orderId: "ord-1" });
-    expect(deferred).toHaveLength(3);
+    expect(deferred).toHaveLength(4);
     expect(submitOrderToArtelo).not.toHaveBeenCalled();
     expect(deliverDigitalFiles).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmail).not.toHaveBeenCalled();
     expect(capturePostHogServerEvent).not.toHaveBeenCalled();
-    // The deferred tasks then actually invoke all three side effects.
+    // The deferred tasks then actually invoke all four side effects.
     await Promise.all(deferred.map((t) => t()));
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
     expect(capturePostHogServerEvent).toHaveBeenCalledWith(
       "checkout_completed",
       "ord-1",
@@ -283,6 +313,58 @@ describe("handleArteloPayload — unconfigured DB", () => {
     await expect(
       handleArteloPayload({ id: "ord_x", status: "Shipped" }),
     ).resolves.toEqual({ handled: false });
+  });
+});
+
+describe("handleArteloPayload — shipment notification hook-in", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    findOrderByArteloId.mockResolvedValue({ id: "ord-1", status: "paid" });
+    advanceOrderStatus.mockResolvedValue(undefined);
+    sendShipmentNotificationEmail.mockResolvedValue({ sent: true });
+  });
+
+  it('fires sendShipmentNotificationEmail("shipped") after advancing status on a Shipped callback', async () => {
+    const result = await handleArteloPayload({ id: "artelo_1", status: "Shipped" });
+    expect(result).toEqual({ handled: true, orderId: "ord-1" });
+    expect(advanceOrderStatus).toHaveBeenCalledWith("ord-1", "shipped", expect.any(Object));
+    expect(sendShipmentNotificationEmail).toHaveBeenCalledWith("ord-1", "shipped");
+  });
+
+  it('fires sendShipmentNotificationEmail("delivered") on a Delivered callback', async () => {
+    await handleArteloPayload({ id: "artelo_1", status: "Delivered" });
+    expect(sendShipmentNotificationEmail).toHaveBeenCalledWith("ord-1", "delivered");
+  });
+
+  it("does not fire for statuses that aren't shipped/delivered (e.g. InProduction)", async () => {
+    await handleArteloPayload({ id: "artelo_1", status: "InProduction" });
+    expect(advanceOrderStatus).toHaveBeenCalledWith("ord-1", "in_production", expect.any(Object));
+    expect(sendShipmentNotificationEmail).not.toHaveBeenCalled();
+  });
+
+  it("does not fire for Canceled", async () => {
+    await handleArteloPayload({ id: "artelo_1", status: "Canceled" });
+    expect(sendShipmentNotificationEmail).not.toHaveBeenCalled();
+  });
+
+  it("a rejected sendShipmentNotificationEmail promise does not throw out of the handler", async () => {
+    sendShipmentNotificationEmail.mockRejectedValue(new Error("resend blew up"));
+    await expect(handleArteloPayload({ id: "artelo_1", status: "Shipped" })).resolves.toEqual({
+      handled: true,
+      orderId: "ord-1",
+    });
+  });
+
+  it("resolves before the deferred email send runs, when a deferrer is injected", async () => {
+    const deferred: Array<() => Promise<unknown>> = [];
+    const result = await handleArteloPayload({ id: "artelo_1", status: "Shipped" }, (task) => {
+      deferred.push(task);
+    });
+    expect(result).toEqual({ handled: true, orderId: "ord-1" });
+    expect(deferred).toHaveLength(1);
+    expect(sendShipmentNotificationEmail).not.toHaveBeenCalled();
+    await Promise.all(deferred.map((t) => t()));
+    expect(sendShipmentNotificationEmail).toHaveBeenCalledWith("ord-1", "shipped");
   });
 });
 

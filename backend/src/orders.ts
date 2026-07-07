@@ -753,17 +753,22 @@ export type SweepCandidate = { id: string; orderNumber: string };
 /**
  * Paid orders that still look unfinished past the deferred-task window, for the
  * hourly `/jobs/fulfillment-sweep` cron (routes/jobs.ts). The Stripe webhook now
- * defers its two paid-transition side effects (Artelo submit + digital delivery)
- * past the 200 response via waitUntil — a process kill mid-task leaves a paid
- * order stuck with no retry signal. Candidates are `paid` orders whose
- * `paid_at` is older than 15 minutes (well past normal deferred-task duration)
- * and either:
- *   (a) have a non-digital line item but no `artelo_order_id` yet, or
- *   (b) have a line item with a deliverable asset but `digital_delivered_at`
+ * defers its paid-transition side effects (order confirmation email + Artelo
+ * submit + digital delivery) past the 200 response via waitUntil — a process
+ * kill mid-task leaves a paid order stuck with no retry signal. Candidates are
+ * `paid` orders whose `paid_at` is older than 15 minutes (well past normal
+ * deferred-task duration) and any of:
+ *   (a) still missing `confirmation_email_sent_at`,
+ *   (b) have a non-digital line item but no `artelo_order_id` yet, or
+ *   (c) have a line item with a deliverable asset but `digital_delivered_at`
  *       is still null.
- * Ordered oldest-first and capped by `limit`. Both `submitOrderToArtelo` and
- * `deliverDigitalFiles` are idempotent + never-throw, so the caller can just
- * re-run both for every candidate without re-deriving which half is missing.
+ * (Shipped/delivered emails are NOT swept here — they're driven by Artelo
+ * status callbacks that can legitimately land days after `paid_at`, so a
+ * fixed 15-minute staleness window doesn't apply to them.)
+ * Ordered oldest-first and capped by `limit`. `sendOrderConfirmationEmail`,
+ * `submitOrderToArtelo`, and `deliverDigitalFiles` are all idempotent +
+ * never-throw, so the caller can just re-run all three for every candidate
+ * without re-deriving which part is missing.
  */
 export async function findOrdersNeedingFulfillmentSweep(limit: number): Promise<SweepCandidate[]> {
   const sql = getSql();
@@ -775,6 +780,8 @@ export async function findOrdersNeedingFulfillmentSweep(limit: number): Promise<
       and o.paid_at is not null
       and o.paid_at < now() - interval '15 minutes'
       and (
+        o.confirmation_email_sent_at is null
+        or
         (
           o.artelo_order_id is null
           and exists (
@@ -797,4 +804,181 @@ export async function findOrdersNeedingFulfillmentSweep(limit: number): Promise<
     limit ${limit}
   `) as unknown as { id: string; order_number: string }[];
   return rows.map((r) => ({ id: r.id, orderNumber: r.order_number }));
+}
+
+// ── Order confirmation email (post-payment receipt) ──────────────────────────
+
+/** Order shape the order-confirmation module needs to build/send the email. */
+export type ConfirmationEmailOrder = {
+  id: string;
+  orderNumber: string;
+  email: string;
+  currency: string;
+  subtotalCents: number;
+  shippingCents: number;
+  totalCents: number;
+  confirmationEmailSentAt: string | null;
+  shippingAddress?: OrderShippingAddress;
+  items: { productLabel: string; quantity: number; unitPriceCents: number }[];
+};
+
+/** Load everything needed to email an order's confirmation (null when unconfigured/absent). */
+export async function getOrderForConfirmationEmail(orderId: string): Promise<ConfirmationEmailOrder | null> {
+  const sql = getSql();
+  if (!sql) return null;
+  const rows = (await sql`
+    select * from orders where id = ${orderId} limit 1
+  `) as unknown as (OrderRow & { confirmation_email_sent_at: string | Date | null })[];
+  const row = rows[0];
+  if (!row) return null;
+  const items = (await sql`
+    select product_label, quantity, unit_price_cents
+    from order_items where order_id = ${orderId} order by created_at asc
+  `) as unknown as { product_label: string; quantity: number; unit_price_cents: number }[];
+  const shippingAddress =
+    row.ship_line1 || row.ship_name
+      ? {
+          name: row.ship_name ?? undefined,
+          line1: row.ship_line1 ?? undefined,
+          line2: row.ship_line2 ?? undefined,
+          city: row.ship_city ?? undefined,
+          region: row.ship_region ?? undefined,
+          postal: row.ship_postal ?? undefined,
+          country: row.ship_country ?? undefined,
+        }
+      : undefined;
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    email: row.email,
+    currency: row.currency,
+    subtotalCents: row.subtotal_cents,
+    shippingCents: row.shipping_cents,
+    totalCents: row.total_cents,
+    confirmationEmailSentAt: row.confirmation_email_sent_at
+      ? new Date(row.confirmation_email_sent_at).toISOString()
+      : null,
+    shippingAddress,
+    items: items.map((it) => ({
+      productLabel: it.product_label,
+      quantity: it.quantity,
+      unitPriceCents: it.unit_price_cents,
+    })),
+  };
+}
+
+/**
+ * Atomically claim the right to email an order's confirmation: sets
+ * `confirmation_email_sent_at` only if it's still null, mirroring
+ * `claimDigitalDelivery`'s race-free "update ... where col is null" shape.
+ */
+export async function claimConfirmationEmail(orderId: string): Promise<boolean> {
+  const sql = requireSql();
+  const rows = (await sql`
+    update orders set confirmation_email_sent_at = now(), updated_at = now()
+    where id = ${orderId} and confirmation_email_sent_at is null
+    returning id
+  `) as unknown as { id: string }[];
+  return rows.length > 0;
+}
+
+/** Undo a claim after a failed send, so the next attempt (webhook retry, sweep) can retry. */
+export async function releaseConfirmationEmailClaim(orderId: string): Promise<void> {
+  const sql = requireSql();
+  await sql`
+    update orders set confirmation_email_sent_at = null, updated_at = now()
+    where id = ${orderId}
+  `;
+}
+
+// ── Shipment notification emails (shipped / delivered) ───────────────────────
+
+export type ShipmentEmailKind = "shipped" | "delivered";
+
+/** Order shape the shipment-notification module needs to build/send the email. */
+export type ShipmentEmailOrder = {
+  id: string;
+  orderNumber: string;
+  email: string;
+  userId: string | null;
+  shippedEmailSentAt: string | null;
+  deliveredEmailSentAt: string | null;
+  tracking?: OrderTracking;
+};
+
+/** Load everything needed to email an order's shipped/delivered notice (null when unconfigured/absent). */
+export async function getOrderForShipmentEmail(orderId: string): Promise<ShipmentEmailOrder | null> {
+  const sql = getSql();
+  if (!sql) return null;
+  const rows = (await sql`
+    select id, order_number, email, user_id, tracking_carrier, tracking_number, tracking_url,
+           shipped_email_sent_at, delivered_email_sent_at
+    from orders where id = ${orderId} limit 1
+  `) as unknown as {
+    id: string;
+    order_number: string;
+    email: string;
+    user_id: string | null;
+    tracking_carrier: string | null;
+    tracking_number: string | null;
+    tracking_url: string | null;
+    shipped_email_sent_at: string | Date | null;
+    delivered_email_sent_at: string | Date | null;
+  }[];
+  const row = rows[0];
+  if (!row) return null;
+  const tracking =
+    row.tracking_carrier || row.tracking_number || row.tracking_url
+      ? {
+          carrier: row.tracking_carrier ?? undefined,
+          number: row.tracking_number ?? undefined,
+          url: row.tracking_url ?? undefined,
+        }
+      : undefined;
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    email: row.email,
+    userId: row.user_id,
+    shippedEmailSentAt: row.shipped_email_sent_at ? new Date(row.shipped_email_sent_at).toISOString() : null,
+    deliveredEmailSentAt: row.delivered_email_sent_at
+      ? new Date(row.delivered_email_sent_at).toISOString()
+      : null,
+    tracking,
+  };
+}
+
+/**
+ * Atomically claim the right to send a shipped/delivered email: sets the
+ * matching `{kind}_email_sent_at` column only if it's still null. Shipped and
+ * delivered are independent claims on separate columns (an order legitimately
+ * gets both, one after the other), so `kind` picks which column this call
+ * guards.
+ */
+export async function claimShipmentEmail(orderId: string, kind: ShipmentEmailKind): Promise<boolean> {
+  const sql = requireSql();
+  const rows = (
+    kind === "shipped"
+      ? await sql`
+          update orders set shipped_email_sent_at = now(), updated_at = now()
+          where id = ${orderId} and shipped_email_sent_at is null
+          returning id
+        `
+      : await sql`
+          update orders set delivered_email_sent_at = now(), updated_at = now()
+          where id = ${orderId} and delivered_email_sent_at is null
+          returning id
+        `
+  ) as unknown as { id: string }[];
+  return rows.length > 0;
+}
+
+/** Undo a claim after a failed send, so a later retry (webhook or admin sync) can re-send. */
+export async function releaseShipmentEmailClaim(orderId: string, kind: ShipmentEmailKind): Promise<void> {
+  const sql = requireSql();
+  if (kind === "shipped") {
+    await sql`update orders set shipped_email_sent_at = null, updated_at = now() where id = ${orderId}`;
+  } else {
+    await sql`update orders set delivered_email_sent_at = null, updated_at = now() where id = ${orderId}`;
+  }
 }

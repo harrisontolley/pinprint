@@ -9,10 +9,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // is a plain SQL query with no dedicated unit test file for the orders.ts store
 // (matching this codebase's convention — see webhooks.test.ts/digitalDelivery.test.ts,
 // which module-mock ./orders.js rather than hitting a real DB); here we mock it plus
-// its two idempotent collaborators to prove the route: authorizes like blob-gc, resubmits
+// its three idempotent collaborators to prove the route: authorizes like blob-gc, resubmits
 // every candidate the store returns, and correctly counts only the successful outcomes
-// (which is how "skips already-fulfilled/delivered/too-recent" actually manifests once
-// the store's WHERE clause excludes them).
+// (which is how "skips already-fulfilled/delivered/confirmed/too-recent" actually manifests
+// once the store's WHERE clause excludes them).
 
 const findOrdersNeedingFulfillmentSweep = vi.fn(async () => [] as { id: string; orderNumber: string }[]);
 vi.mock("../orders.js", () => ({
@@ -27,6 +27,11 @@ vi.mock("../fulfillment.js", () => ({
 const deliverDigitalFiles = vi.fn(async () => ({ delivered: false, reason: "already_delivered" }));
 vi.mock("../digitalDelivery.js", () => ({
   deliverDigitalFiles: (...args: unknown[]) => deliverDigitalFiles(...args),
+}));
+
+const sendOrderConfirmationEmail = vi.fn(async () => ({ sent: false, reason: "already_sent" }));
+vi.mock("../orderEmails.js", () => ({
+  sendOrderConfirmationEmail: (...args: unknown[]) => sendOrderConfirmationEmail(...args),
 }));
 
 const { app } = await import("../app.js");
@@ -89,6 +94,7 @@ describe("POST /jobs/fulfillment-sweep", () => {
     findOrdersNeedingFulfillmentSweep.mockReset().mockResolvedValue([]);
     submitOrderToArtelo.mockReset().mockResolvedValue({ submitted: false, reason: "already_submitted" });
     deliverDigitalFiles.mockReset().mockResolvedValue({ delivered: false, reason: "already_delivered" });
+    sendOrderConfirmationEmail.mockReset().mockResolvedValue({ sent: false, reason: "already_sent" });
   });
   afterEach(() => {
     if (prevSecret === undefined) delete process.env.CRON_SECRET;
@@ -120,9 +126,16 @@ describe("POST /jobs/fulfillment-sweep", () => {
       headers: { authorization: "Bearer s3cret" },
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, scanned: 0, arteloSubmitted: 0, digitalDelivered: 0 });
+    expect(await res.json()).toEqual({
+      ok: true,
+      scanned: 0,
+      arteloSubmitted: 0,
+      digitalDelivered: 0,
+      confirmationSent: 0,
+    });
     expect(submitOrderToArtelo).not.toHaveBeenCalled();
     expect(deliverDigitalFiles).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmail).not.toHaveBeenCalled();
   });
 
   it("resubmits every qualifying order and counts only the successful outcomes", async () => {
@@ -131,25 +144,37 @@ describe("POST /jobs/fulfillment-sweep", () => {
       { id: "ord-1", orderNumber: "PP-AAAA1111" },
       { id: "ord-2", orderNumber: "PP-BBBB2222" },
     ]);
-    // ord-1 still needs its Artelo submission; ord-2 still needs digital delivery —
-    // both collaborators are still called for both orders (never-throw + idempotent,
-    // see fulfillment.ts/digitalDelivery.ts), only the counts should reflect success.
+    // ord-1 still needs its Artelo submission; ord-2 still needs digital delivery
+    // and its confirmation email — all collaborators are still called for both
+    // orders (never-throw + idempotent, see fulfillment.ts/digitalDelivery.ts/
+    // orderEmails.ts), only the counts should reflect success.
     submitOrderToArtelo.mockImplementation(async (id: string) =>
       id === "ord-1" ? { submitted: true } : { submitted: false, reason: "already_submitted" },
     );
     deliverDigitalFiles.mockImplementation(async (id: string) =>
       id === "ord-2" ? { delivered: true } : { delivered: false, reason: "already_delivered" },
     );
+    sendOrderConfirmationEmail.mockImplementation(async (id: string) =>
+      id === "ord-2" ? { sent: true } : { sent: false, reason: "already_sent" },
+    );
     const res = await app.request("/jobs/fulfillment-sweep", {
       method: "POST",
       headers: { authorization: "Bearer s3cret" },
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, scanned: 2, arteloSubmitted: 1, digitalDelivered: 1 });
+    expect(await res.json()).toEqual({
+      ok: true,
+      scanned: 2,
+      arteloSubmitted: 1,
+      digitalDelivered: 1,
+      confirmationSent: 1,
+    });
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-1");
     expect(submitOrderToArtelo).toHaveBeenCalledWith("ord-2");
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-1");
     expect(deliverDigitalFiles).toHaveBeenCalledWith("ord-2");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-1");
+    expect(sendOrderConfirmationEmail).toHaveBeenCalledWith("ord-2");
   });
 
   it("is mounted under the /_/backend service prefix too", async () => {
@@ -160,6 +185,12 @@ describe("POST /jobs/fulfillment-sweep", () => {
       headers: { authorization: "Bearer s3cret" },
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, scanned: 0, arteloSubmitted: 0, digitalDelivered: 0 });
+    expect(await res.json()).toEqual({
+      ok: true,
+      scanned: 0,
+      arteloSubmitted: 0,
+      digitalDelivered: 0,
+      confirmationSent: 0,
+    });
   });
 });

@@ -154,7 +154,7 @@ function registerRoutes(r: Hono): Hono {
     });
     if (logged.duplicate) return c.body(null, 204);
     try {
-      const res = await handleArteloPayload(payload);
+      const res = await handleArteloPayload(payload, deferrerFor(c));
       await finalizeWebhookEvent(logged.id, {
         status: res.handled ? "processed" : "ignored",
         orderId: res.orderId,

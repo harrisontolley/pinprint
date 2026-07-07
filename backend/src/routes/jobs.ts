@@ -4,6 +4,7 @@ import { runBlobGc } from "../blobGc.js";
 import { findOrdersNeedingFulfillmentSweep } from "../orders.js";
 import { submitOrderToArtelo } from "../fulfillment.js";
 import { deliverDigitalFiles } from "../digitalDelivery.js";
+import { sendOrderConfirmationEmail } from "../orderEmails.js";
 
 // Scheduled maintenance jobs, invoked by Vercel Cron (see vercel.json). Vercel
 // sends `Authorization: Bearer $CRON_SECRET` on cron requests when CRON_SECRET is
@@ -41,14 +42,14 @@ export function buildJobsRouter(): Hono {
   });
 
   // Reconciliation safety net (hourly): the Stripe webhook now defers its
-  // paid-transition side effects (Artelo submit + digital delivery) past the
-  // 200 response via waitUntil — a process kill mid-task leaves a paid order
-  // stuck with no retry signal. This finds `paid` orders older than 15 minutes
-  // still missing their Artelo submission and/or digital delivery, and re-runs
-  // both collaborators for each. Both are idempotent + never-throw (see
-  // fulfillment.ts / digitalDelivery.ts), including the digital-delivery claim:
-  // this does NOT force-release a stuck claim, it just calls deliverDigitalFiles
-  // again — a genuinely stuck claim stays a documented manual case.
+  // paid-transition side effects (order confirmation email + Artelo submit +
+  // digital delivery) past the 200 response via waitUntil — a process kill
+  // mid-task leaves a paid order stuck with no retry signal. This finds `paid`
+  // orders older than 15 minutes still missing any of the three, and re-runs
+  // all three collaborators for each. All are idempotent + never-throw (see
+  // orderEmails.ts / fulfillment.ts / digitalDelivery.ts), including their
+  // claims: this does NOT force-release a stuck claim, it just calls the
+  // sender again — a genuinely stuck claim stays a documented manual case.
   r.on(["GET", "POST"], "/fulfillment-sweep", async (c) => {
     const secret = process.env.CRON_SECRET;
     if (!secret) return c.json({ error: "cron_unconfigured" }, 503);
@@ -58,15 +59,18 @@ export function buildJobsRouter(): Hono {
     const candidates = await findOrdersNeedingFulfillmentSweep(FULFILLMENT_SWEEP_LIMIT);
     let arteloSubmitted = 0;
     let digitalDelivered = 0;
+    let confirmationSent = 0;
     for (const order of candidates) {
-      const [arteloResult, digitalResult] = await Promise.all([
+      const [arteloResult, digitalResult, confirmationResult] = await Promise.all([
         submitOrderToArtelo(order.id),
         deliverDigitalFiles(order.id),
+        sendOrderConfirmationEmail(order.id),
       ]);
       if (arteloResult.submitted) arteloSubmitted += 1;
       if (digitalResult.delivered) digitalDelivered += 1;
+      if (confirmationResult.sent) confirmationSent += 1;
     }
-    return c.json({ ok: true, scanned: candidates.length, arteloSubmitted, digitalDelivered });
+    return c.json({ ok: true, scanned: candidates.length, arteloSubmitted, digitalDelivered, confirmationSent });
   });
 
   return r;
