@@ -343,6 +343,8 @@ export function PosterStudio() {
           footer={text.footer}
           display={display}
           posterRef={posterRef}
+          mockupAvailable={format === "print" && step >= STEP_INDEX.size}
+          frame={frame}
         />
         <WallpaperCapture
           home={previewHome}
