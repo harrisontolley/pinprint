@@ -76,7 +76,11 @@ export function PosterStage({
       )}
 
       {mockupAvailable && (
-        <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-0.5 rounded-pill border border-hairline bg-surface-card/90 p-0.5 shadow-sm backdrop-blur sm:top-6 lg:top-10">
+        <div
+          role="group"
+          aria-label="Preview view"
+          className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-0.5 rounded-pill border border-hairline bg-surface-card/90 p-0.5 shadow-sm backdrop-blur sm:top-6 lg:top-10"
+        >
           {(["flat", "wall"] as const).map((v) => (
             <button
               key={v}

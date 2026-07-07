@@ -40,7 +40,7 @@ const FRAME_QUAD: Quad = [
   [0.34, 0.7488],
 ];
 
-type FinishStyle = {
+export type FinishStyle = {
   /** How the tint combines with the photographed oak underneath. */
   blend: "multiply" | "screen" | "normal";
   opacity: number;
@@ -57,7 +57,7 @@ type FinishStyle = {
 // itself — no entry here, no overlay. Every value was calibrated by compositing
 // the candidate over the real room pixels; the rgb()s are the fill, not the
 // visible result.
-const FRAME_FINISHES: Partial<Record<FrameColor, FinishStyle>> = {
+export const FRAME_FINISHES: Partial<Record<FrameColor, FinishStyle>> = {
   BlackOak: { blend: "multiply", opacity: 1, background: "rgb(60, 72, 96)" },
   WalnutOak: { blend: "multiply", opacity: 1, background: "rgb(120, 101, 92)" },
   WhiteOak: { blend: "normal", opacity: 0.82, background: "rgb(200, 190, 179)" },
@@ -176,84 +176,117 @@ export function RoomMockup({
 
   return (
     <div ref={wrapRef} className={`relative overflow-hidden ${className}`}>
-      <Image
-        src={ROOM_SRC}
-        alt="Your finished piece framed on a wall above a leather armchair and a brass lamp"
-        width={ROOM_W}
-        height={ROOM_H}
-        className="absolute inset-0 h-full w-full object-contain"
-        sizes="(min-width: 1024px) 640px, 90vw"
-      />
-
-      {ready && finish && band && (
-        // Tint band over the photographed oak. It fills the whole outer frame
-        // rectangle; the opaque print plate below masks its centre, so only the
-        // frame ring shows. Deliberately NOT isolated — it blends with the room
-        // image behind it, carrying the wood's grain and the room's lighting
-        // through the recolour.
-        <div
-          data-testid="frame-tint"
-          className="absolute left-0 top-0 origin-top-left"
-          style={{
-            width: band.w,
-            height: band.h,
-            transform: band.transform,
-            background: finish.background,
-            mixBlendMode: finish.blend,
-            opacity: finish.opacity,
-          }}
-          aria-hidden
+      {/* The scene as one labelled image (mirroring the flat poster's role=img
+          label, which leaves the a11y tree while the wall view hides that card).
+          The caption below sits OUTSIDE this wrapper so it stays readable —
+          descendants of role=img are presentational. */}
+      <div
+        role="img"
+        aria-label={
+          home
+            ? `Map of places radiating from ${home.label}, framed on a wall above a leather armchair and a brass lamp`
+            : "Your design framed on a wall above a leather armchair and a brass lamp"
+        }
+        className="absolute inset-0"
+      >
+        <Image
+          src={ROOM_SRC}
+          alt=""
+          width={ROOM_W}
+          height={ROOM_H}
+          className="absolute inset-0 h-full w-full object-contain"
+          sizes="(min-width: 1024px) 640px, 90vw"
         />
-      )}
 
-      {ready && (
-        // One warped "plate" (shares the matrix3d), isolated so the blend-mode
-        // shading layers below tint ONLY the graphic, not the room behind it. The
-        // stack bakes the room's real lighting onto the live print (warm paper
-        // tone + vignette, then a brass-lamp glow) so it reads printed-and-framed
-        // rather than pasted on — calibrated against this same room in
-        // LandingPoster.
-        <div
-          className="absolute left-0 top-0 origin-top-left"
+        {ready && finish && band && (
+          // Tint band over the photographed oak. It fills the whole outer frame
+          // rectangle; the opaque print plate below masks its centre, so only the
+          // frame ring shows. Deliberately NOT isolated — it blends with the room
+          // image behind it, carrying the wood's grain and the room's lighting
+          // through the recolour.
+          <div
+            data-testid="frame-tint"
+            className="absolute left-0 top-0 origin-top-left"
+            style={{
+              width: band.w,
+              height: band.h,
+              transform: band.transform,
+              background: finish.background,
+              mixBlendMode: finish.blend,
+              opacity: finish.opacity,
+            }}
+            aria-hidden
+          />
+        )}
+
+        {ready && (
+          // One warped "plate" (shares the matrix3d), isolated so the blend-mode
+          // shading layers below tint ONLY the graphic, not the room behind it.
+          // The stack bakes the room's real lighting onto the live print (warm
+          // paper tone + vignette, then a brass-lamp glow) so it reads
+          // printed-and-framed rather than pasted on — calibrated against this
+          // same room in LandingPoster.
+          <div
+            className="absolute left-0 top-0 origin-top-left"
+            style={{
+              width,
+              height,
+              transform: posterTransform,
+              isolation: "isolate",
+              boxShadow:
+                "inset 0 0 26px 7px rgba(22,16,10,0.17), 0 0 0 1px rgba(12,10,9,0.07)",
+            }}
+            aria-hidden
+          >
+            <Poster
+              home={home}
+              items={items}
+              template={template}
+              units={units}
+              width={width}
+              height={height}
+              title={title}
+              subtitle={subtitle}
+              footer={footer}
+              display={display}
+              idPrefix="mockup"
+            />
+
+            <div
+              className="absolute inset-0 mix-blend-multiply"
+              style={{
+                backgroundImage:
+                  "radial-gradient(125% 120% at 62% 62%, rgba(255,255,255,0) 50%, rgba(52,46,38,0.3) 100%), linear-gradient(#efe9dc, #efe9dc)",
+              }}
+            />
+            <div
+              className="absolute inset-0 mix-blend-screen"
+              style={{
+                backgroundImage:
+                  "linear-gradient(305deg, rgba(255,196,120,0.18) 0%, rgba(255,214,150,0.06) 26%, rgba(255,255,255,0) 50%)",
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Honesty note: the photo's frame is part of the scene, so a buyer who
+          hasn't added a frame must never read it as included. Anchored to the
+          contained photo's bottom edge so it stays on the picture at any
+          container shape. */}
+      {ready && frame === null && (
+        <p
+          className="absolute z-10 flex justify-center"
           style={{
-            width,
-            height,
-            transform: posterTransform,
-            isolation: "isolate",
-            boxShadow:
-              "inset 0 0 26px 7px rgba(22,16,10,0.17), 0 0 0 1px rgba(12,10,9,0.07)",
+            left: rect.x,
+            width: rect.width,
+            top: rect.y + rect.height - 34,
           }}
-          aria-hidden
         >
-          <Poster
-            home={home}
-            items={items}
-            template={template}
-            units={units}
-            width={width}
-            height={height}
-            title={title}
-            subtitle={subtitle}
-            footer={footer}
-            display={display}
-            idPrefix="mockup"
-          />
-
-          <div
-            className="absolute inset-0 mix-blend-multiply"
-            style={{
-              backgroundImage:
-                "radial-gradient(125% 120% at 62% 62%, rgba(255,255,255,0) 50%, rgba(52,46,38,0.3) 100%), linear-gradient(#efe9dc, #efe9dc)",
-            }}
-          />
-          <div
-            className="absolute inset-0 mix-blend-screen"
-            style={{
-              backgroundImage:
-                "linear-gradient(305deg, rgba(255,196,120,0.18) 0%, rgba(255,214,150,0.06) 26%, rgba(255,255,255,0) 50%)",
-            }}
-          />
-        </div>
+          <span className="rounded-pill bg-ink/75 px-3 py-1 text-[11px] font-medium text-on-primary backdrop-blur">
+            Shown in a natural oak frame. Loose prints arrive unframed.
+          </span>
+        </p>
       )}
     </div>
   );

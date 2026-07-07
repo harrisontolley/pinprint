@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "@testing-library/react";
-import { RoomMockup } from "./RoomMockup";
+import { cleanup, render } from "@testing-library/react";
+import { FRAME_FINISHES, RoomMockup } from "./RoomMockup";
 import { getTemplate } from "@/lib/templates/registry";
-import type { FrameSelection } from "@/lib/commerce/price";
+import type { FrameColor, FrameSelection } from "@/lib/commerce/price";
 import type { Place } from "@/lib/types";
 
 // Component-level check for the in-studio room mockup: the room photo renders,
@@ -43,6 +43,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // No `globals: true` in vitest.config, so RTL's auto-cleanup never registers —
+  // clean up explicitly or renders accumulate in document.body across tests.
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -92,19 +95,37 @@ describe("RoomMockup", () => {
     expect(queryByTestId("frame-tint")).toBeNull();
   });
 
-  it("tints the frame per finish, and a different finish paints a different overlay", () => {
-    const black = renderMockup({ material: "Oak", color: "BlackOak" });
-    const blackTint = black.getByTestId("frame-tint");
-    expect(blackTint).toBeInTheDocument();
-    expect(blackTint.style.mixBlendMode).toBe("multiply");
-    const blackBg = blackTint.style.background;
-    black.unmount();
+  // Every non-natural finish (all 7 FRAME_FINISHES entries) must wire its
+  // declared blend mode, fill, and opacity onto the tint band.
+  it.each(Object.entries(FRAME_FINISHES))(
+    "tints the %s finish with its declared blend and fill",
+    (color, finish) => {
+      const material = color.endsWith("Metal") ? ("Metal" as const) : ("Oak" as const);
+      const { getByTestId } = renderMockup({ material, color: color as FrameColor });
+      const tint = getByTestId("frame-tint");
+      expect(tint.style.mixBlendMode).toBe(finish.blend);
+      expect(tint.style.opacity).toBe(String(finish.opacity));
+      // Solid fills round-trip exactly; gradient fills keep their color stops.
+      if (finish.background.startsWith("linear-gradient")) {
+        expect(tint.style.background).toContain("linear-gradient");
+        for (const stop of finish.background.match(/rgb\([^)]+\)/g) ?? []) {
+          expect(tint.style.background).toContain(stop);
+        }
+      } else {
+        expect(tint.style.background).toBe(finish.background);
+      }
+    },
+  );
 
-    const gold = renderMockup({ material: "Metal", color: "GoldMetal" });
-    const goldTint = gold.getByTestId("frame-tint");
-    expect(goldTint.style.mixBlendMode).toBe("screen");
-    // A metal finish carries a gradient sheen; the two finishes differ visibly.
-    expect(goldTint.style.background).not.toBe(blackBg);
-    expect(goldTint.style.background).toContain("gradient");
+  it("captions an unframed print so the photographed frame never reads as included", () => {
+    const { getByText } = renderMockup(null);
+    expect(
+      getByText("Shown in a natural oak frame. Loose prints arrive unframed."),
+    ).toBeInTheDocument();
+  });
+
+  it("drops the caption once a frame is chosen", () => {
+    const { queryByText } = renderMockup({ material: "Oak", color: "NaturalOak" });
+    expect(queryByText(/arrive unframed/i)).toBeNull();
   });
 });
