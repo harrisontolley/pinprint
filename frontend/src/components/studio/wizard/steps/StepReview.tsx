@@ -112,7 +112,9 @@ export function StepReview({
         ))}
       </dl>
 
-      <OccasionBanner />
+      {/* Same gate as the ETA line below: a shipping cutoff is meaningless
+          for an instant digital download. */}
+      {format !== "digital" && <OccasionBanner />}
 
       <FreeDesignForm getSvg={getSvg} canSubmit={canSubmit} />
 

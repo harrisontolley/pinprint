@@ -290,7 +290,9 @@ export default function CartPage() {
               {etaLabel && (
                 <p className="mt-3 text-[11px] text-muted">{etaLabel}</p>
               )}
-              <OccasionBanner className="mt-1" />
+              {/* Same gate as the ETA line: a shipping cutoff is meaningless
+                  for an instant digital download. */}
+              {hasPhysicalItem && <OccasionBanner className="mt-1" />}
 
               <p className="mt-3 text-[11px] text-muted">
                 Covered by the{" "}

@@ -178,10 +178,35 @@ export interface OccasionCutoff {
 }
 
 /**
+ * Latest order date whose conservative arrival estimate (max transit plus the
+ * buffer day) lands STRICTLY BEFORE `occasionDate`. A naive backward walk of
+ * MAX_TRANSIT_BUSINESS_DAYS is not enough: addBusinessDays terminates on a
+ * business day in both directions, so when the occasion itself is not a
+ * business day (true for every occasion in the table: Mother's/Father's Day
+ * are Sundays, Christmas is a federal holiday, Valentine's 2026/2027 falls on
+ * weekends) the forward walk from that naive cutoff overshoots PAST the
+ * occasion (e.g. Father's Day 2026, Sun Jun 21: naive cutoff Jun 4, but 11
+ * business days forward from Jun 4 is Mon Jun 22). So start from the naive
+ * candidate and walk it back one business day at a time until the forward
+ * math actually holds.
+ */
+function conservativeOrderBy(occasionDate: Date): Date {
+  let candidate = addBusinessDays(occasionDate, -MAX_TRANSIT_BUSINESS_DAYS);
+  while (
+    addBusinessDays(candidate, MAX_TRANSIT_BUSINESS_DAYS).getTime() >=
+    occasionDate.getTime()
+  ) {
+    candidate = addBusinessDays(candidate, -1);
+  }
+  return candidate;
+}
+
+/**
  * The nearest occasion, within OCCASION_WINDOW_DAYS of `now`, whose
- * conservative cutoff (the order-by date using the slow end of transit plus
- * the buffer day) hasn't passed yet. Returns null once every occasion in the
- * window is already too late to make, or none is close enough yet.
+ * conservative cutoff (the order-by date whose slowest estimated arrival,
+ * including the buffer day, still lands strictly before the occasion) hasn't
+ * passed yet. Returns null once every occasion in the window is already too
+ * late to make, or none is close enough yet.
  */
 export function activeOccasionCutoff(now: Date): OccasionCutoff | null {
   const today = dateOnlyUtc(now);
@@ -197,7 +222,7 @@ export function activeOccasionCutoff(now: Date): OccasionCutoff | null {
     .sort((a, b) => a.occasionDate.getTime() - b.occasionDate.getTime());
 
   for (const { occasion, occasionDate } of upcoming) {
-    const orderByDate = addBusinessDays(occasionDate, -MAX_TRANSIT_BUSINESS_DAYS);
+    const orderByDate = conservativeOrderBy(occasionDate);
     if (orderByDate.getTime() >= today.getTime()) {
       return { occasion, occasionDate, orderByDate };
     }
@@ -205,7 +230,7 @@ export function activeOccasionCutoff(now: Date): OccasionCutoff | null {
   return null;
 }
 
-/** "Order by Jan 30 to arrive before Valentine's Day" — always "to", never a dash. */
+/** "Order by Jan 29 to arrive before Valentine's Day" — always "to", never a dash. */
 export function formatOccasionCutoff(cutoff: OccasionCutoff): string {
   return `Order by ${formatMonthDay(cutoff.orderByDate)} to arrive before ${cutoff.occasion.name}`;
 }
