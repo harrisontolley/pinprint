@@ -13,6 +13,7 @@ import {
 } from "./orders.js";
 import { submitOrderToArtelo } from "./fulfillment.js";
 import { deliverDigitalFiles } from "./digitalDelivery.js";
+import { sendOrderConfirmationEmail, sendShipmentNotificationEmail } from "./orderEmails.js";
 import { runNow, type Deferrer } from "./defer.js";
 import { capturePostHogServerEvent } from "./posthog.js";
 
@@ -183,6 +184,11 @@ export async function handleStripeEvent(
         // self-guarded, idempotent (claims digital_delivered_at once), and never
         // allowed to fail this webhook.
         defer(() => deliverDigitalFiles(located.id));
+        // Email the order confirmation/receipt — the actual fix for the success
+        // page's "we've emailed your receipt" line, which used to be false.
+        // Same isolation contract: self-guarded, idempotent (claims
+        // confirmation_email_sent_at once), never allowed to fail this webhook.
+        defer(() => sendOrderConfirmationEmail(located.id));
         // Canonical checkout_completed — captured server-side (not from the
         // client success page) so it's trustworthy even if the buyer closes the
         // tab before the confirmation page loads. Never awaited into the webhook.
@@ -271,8 +277,19 @@ export async function handleStripeEvent(
   }
 }
 
-/** Advance an order in response to an Artelo OrderStatusChange callback. */
-export async function handleArteloPayload(payload: unknown): Promise<WebhookHandled> {
+/**
+ * Advance an order in response to an Artelo OrderStatusChange callback. The
+ * shipped/delivered notification email is handed to `defer` for the same
+ * reason as the Stripe paid-transition side effects (see handleStripeEvent):
+ * it must never hold up (or fail) this webhook's response, though in
+ * practice a Resend call is far faster than the print render. Idempotent
+ * (claims shipped_email_sent_at / delivered_email_sent_at) and never-throws,
+ * so deferral doesn't change semantics.
+ */
+export async function handleArteloPayload(
+  payload: unknown,
+  defer: Deferrer = runNow,
+): Promise<WebhookHandled> {
   const { id, status: arteloStatus, shipments } = extractArteloOrder(payload);
   if (!id || !arteloStatus) return { handled: false };
   const located = await findOrderByArteloId(id);
@@ -287,5 +304,8 @@ export async function handleArteloPayload(payload: unknown): Promise<WebhookHand
     payload,
     tracking: trackingFromShipments(shipments),
   });
+  if (status === "shipped" || status === "delivered") {
+    defer(() => sendShipmentNotificationEmail(located.id, status));
+  }
   return { handled: true, orderId: located.id };
 }

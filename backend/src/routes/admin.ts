@@ -22,6 +22,7 @@ import { captureError } from "../sentry.js";
 import { cancelArteloOrder, fetchArteloOrder, submitOrderToArtelo } from "../fulfillment.js";
 import { getArteloConfig } from "../artelo.js";
 import { mapArteloStatus, trackingFromShipments } from "../webhooks.js";
+import { sendShipmentNotificationEmail } from "../orderEmails.js";
 import { recordAdminAction } from "../observability.js";
 
 // Operator-only admin API. Every route is behind requireAdmin (valid Neon Auth
@@ -230,6 +231,13 @@ export function buildAdminRouter(): Hono<{ Variables: AuthVariables }> {
           source: "artelo",
           tracking: trackingFromShipments(snapshot.shipments),
         });
+        // A manual sync can advance status the same way the Artelo webhook
+        // does (e.g. it missed a callback) — fire the matching notification
+        // here too. Idempotent (claims shipped/delivered_email_sent_at) and
+        // never-throws, so a double-fire with a since-arrived webhook is safe.
+        if (mapped === "shipped" || mapped === "delivered") {
+          await sendShipmentNotificationEmail(orderId, mapped);
+        }
       }
     }
     await recordAdminAction({

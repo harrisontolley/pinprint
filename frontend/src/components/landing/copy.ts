@@ -8,6 +8,8 @@
  * policy. Nothing invented, no fabricated testimonials or press logos.
  */
 
+import { GUARANTEE_NAME } from "@pinprint/shared";
+
 export const STUDIO_HREF = "/studio";
 export const PRIMARY_CTA = "Create your print";
 /**
@@ -16,9 +18,11 @@ export const PRIMARY_CTA = "Create your print";
  * Scope stays exactly what it already was: damaged or flawed prints only, a
  * photo, a free replacement or full refund, nothing to send back.
  * Change-of-mind returns are still excluded because every piece is made to
- * order.
+ * order. Defined in @pinprint/shared (not here) so the backend's order-
+ * confirmation email can use the identical name without importing frontend
+ * code — re-exported so existing imports of it from this module keep working.
  */
-export const GUARANTEE_NAME = "The Arrives Perfect Guarantee";
+export { GUARANTEE_NAME };
 
 /** A single FAQ entry. `featured` items are surfaced on the landing-page teaser. */
 export type FaqItem = {

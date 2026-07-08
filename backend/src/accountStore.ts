@@ -87,6 +87,24 @@ export async function updateProfile(
   return mapProfile(rows[0], email, name);
 }
 
+/**
+ * Whether a signed-in user wants shipped/delivered order-update emails
+ * (backend/src/orderEmails.ts). Read-only and lighter than
+ * `getOrCreateProfile` — it doesn't insert a default row for a user who's
+ * never touched their profile settings, since this is called from a
+ * background send (webhook/cron), not a page load. Defaults to `true` for a
+ * user with no row yet, matching `user_profiles.order_updates_opt_in`'s own
+ * column default (0001_init.sql) and the DB-unconfigured/no-key fallback.
+ */
+export async function getOrderUpdatesOptIn(userId: string): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return true;
+  const rows = (await sql`
+    select order_updates_opt_in from user_profiles where user_id = ${userId} limit 1
+  `) as unknown as { order_updates_opt_in: boolean }[];
+  return rows[0]?.order_updates_opt_in ?? true;
+}
+
 // ── Addresses ────────────────────────────────────────────────────────────────
 type AddressRow = {
   id: string;
