@@ -19,9 +19,9 @@ pnpm test         # all Vitest suites once (turbo run test:run)
 Scope to one workspace, or run a single test file, with `pnpm --filter`:
 
 ```bash
-pnpm --filter @pinprint/backend test:run                        # one workspace
-pnpm --filter @pinprint/frontend exec vitest run src/lib/geo/bearing.test.ts   # one file
-pnpm --filter @pinprint/frontend exec vitest run -t "great-circle"            # one test by name
+pnpm --filter @heartbound/backend test:run                        # one workspace
+pnpm --filter @heartbound/frontend exec vitest run src/lib/geo/bearing.test.ts   # one file
+pnpm --filter @heartbound/frontend exec vitest run -t "great-circle"            # one test by name
 ```
 
 `/verify-integration` runs the full suite + the integration readiness check; `/env-pull` pulls secrets from Vercel.
@@ -34,7 +34,7 @@ A pnpm + Turborepo monorepo with three workspaces. The defining decisions span m
 
 - The backend registers every route **twice** — at `/` and at `SERVICE_PREFIX` (`/_/backend`) — because Vercel does not strip the prefix (see `registerRoutes()` in `backend/src/app.ts`). Add new routes inside that function so both mounts get them; cover both in tests (`app.request("/_/backend/...")`).
 - The frontend reaches the backend via `BACKEND_URL` (`frontend/src/lib/api.ts`): Vercel injects `NEXT_PUBLIC_BACKEND_URL=/_/backend` in prod (no CORS); locally it's `http://localhost:8787` and the backend enables CORS.
-- `packages/shared` (`@pinprint/shared`) is the **single source of truth for anything crossing the wire** (the `GeoResult` contract today). Frontend-only types live in `frontend/src/lib/types.ts` and re-export from shared.
+- `packages/shared` (`@heartbound/shared`) is the **single source of truth for anything crossing the wire** (the `GeoResult` contract today). Frontend-only types live in `frontend/src/lib/types.ts` and re-export from shared.
 
 **The poster engine lives entirely in the frontend** under `frontend/src/lib` — pure, unit-tested modules (`geo`, `layout`, `templates`, `affiliations`, `export`) plus a pure SVG renderer in `components/poster` shared by the live preview and the export. The layout engine treats the arrow *angle* (true bearing) as sacred and only adjusts length/nudge to resolve label collisions. State is a zustand store (`lib/store`). The backend never touches these libs. **Read `frontend/README.md` for how the rendering/layout internals work** before changing geometry, layout, or export. (Note: that file predates the backend split and still describes geocoding as a Next.js route — it actually lives in `backend/src/nominatim.ts` now.)
 
