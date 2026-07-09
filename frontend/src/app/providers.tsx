@@ -26,6 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
       api_host: HOST,
       capture_pageview: true,
       capture_exceptions: true, // error tracking (replaces Sentry here)
+      capture_performance: { web_vitals: true }, // $web_vitals for the reliability dashboard
       disable_session_recording: false, // session replay
       session_recording: { maskAllInputs: true }, // privacy: never record raw inputs
     });
