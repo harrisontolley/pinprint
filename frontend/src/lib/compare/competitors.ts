@@ -246,7 +246,8 @@ export const COMPETITORS: readonly Competitor[] = [
       "Grafomap prints one location as an affordable poster; Heartbound Maps maps many places on one print, each with a true bearing and distance from home.",
       "Grafomap's current live prints are on genuine photo paper; Heartbound Maps's loose prints are on Hahnemühle German Etching 310gsm with archival pigment inks.",
       "Grafomap has no digital download and starts cheap; Heartbound Maps starts higher but includes the digital files and sells a standalone download.",
-      "Grafomap is the budget single-map pick; Heartbound Maps is the fine-art, multi-place gift.",
+      "Some Grafomap customers report prints arriving creased or damaged from thin packaging, with slow or unresponsive replacements; Heartbound Maps ships protected and backs every order with a damage guarantee, a photo gets a free replacement or full refund, nothing to return.",
+      "Grafomap is the budget single-map pick; Heartbound Maps is the fine-art, multi-place gift that arrives protected and guaranteed.",
     ],
     atAGlance: [
       {
@@ -290,6 +291,12 @@ export const COMPETITORS: readonly Competitor[] = [
         competitor: "Free over $75; otherwise ~$8.90; US-focused",
         advantage: "heartbound",
       },
+      {
+        attribute: "If it arrives damaged",
+        heartbound: "A photo gets a free replacement or full refund, nothing to return",
+        competitor: "Damaged and creased arrivals reported; replacements can be slow or unanswered",
+        advantage: "heartbound",
+      },
     ],
     deepDive: [
       {
@@ -309,8 +316,10 @@ export const COMPETITORS: readonly Competitor[] = [
         body: [
           "Grafomap's current live product is described as a “deluxe print on genuine photo paper,” with the framed version adding acrylic glass and a wooden backing. We couldn't verify an archival rating, paper weight, or pigment-ink claim on the live site, so photo paper is the spec to go on.",
           "Heartbound Maps's loose prints are on Hahnemühle German Etching 310gsm with archival pigment inks, made to order. Framed prints use 300gsm 100% cotton-rag paper behind a premium natural-oak ready-to-hang frame. That's a genuinely different, more premium substrate than photo paper. For a print you hold in your hands, nothing competes with the texture of that 310gsm German Etching.",
+          "Condition on arrival matters as much as the paper. Some Grafomap customers report soft or frayed edges, plus prints that reach them creased or dented from thin packaging. Heartbound Maps ships every print in protective packaging that opens well, and because each one is made to order you keep the digital files, so a damaged arrival is a free reprint under the damage guarantee, not a loss.",
         ],
-        takeaway: "Heartbound Maps's edge: real cotton-rag fine-art paper vs. photo paper.",
+        takeaway:
+          "Heartbound Maps's edge: real cotton-rag fine-art paper, shipped protected and guaranteed.",
       },
       {
         id: "styles",
@@ -328,9 +337,10 @@ export const COMPETITORS: readonly Competitor[] = [
           "Grafomap is the cheaper entry point: its current live sizes run roughly $19 to $48 unframed and $52 to $118 framed, with free shipping over $75 and aggressive price-match guarantees. There's no digital download.",
           `Heartbound Maps's prints run ${PP.priceRange}, with a ready-to-hang frame adding ${PP.frameUpchargeRange}. Every print includes the digital files, and a standalone download is ${PP.digitalPrice}. Shipping is free with no minimum.`,
           "If the goal is the lowest possible price on a single map, Grafomap wins. If you want fine-art paper, the digital files, and many places on one print, Heartbound Maps is the stronger value despite the higher sticker.",
+          "One caveat on the cheap sticker: it only pays off if the print arrives right. Grafomap advertises a money-back and price-match guarantee, but some customers report being asked to destroy a damaged print for photos and then waiting weeks, or going unanswered, for the refund or reprint. Heartbound Maps's guarantee is simpler: send a photo, get a free replacement or full refund, keep the original, no hoops.",
         ],
         takeaway:
-          "Honest call: Grafomap is cheaper up front; Heartbound Maps includes more for the money.",
+          "Honest call: Grafomap is cheaper up front; Heartbound Maps includes more, and guarantees it.",
       },
       {
         id: "shipping",
@@ -338,8 +348,10 @@ export const COMPETITORS: readonly Competitor[] = [
         body: [
           "Grafomap (via CanvasDiscount) is US-focused, with free shipping over $75 and a flat fee otherwise; it advertises fast dispatch with typical delivery in about 5 to 10 days.",
           "Heartbound Maps also ships within the US, but shipping is free on every order with no threshold, and most orders arrive within 5 to 10 business days.",
+          "The difference customers feel is in how it arrives. Grafomap fulfils through a third-party discount printer, and reviews report thin packaging (stretch wrap, no bubble or corner protection) and handoffs where the print gets held and buyers are told to chase Grafomap. Heartbound Maps ships in protective packaging that opens well, and if anything does arrive damaged the guarantee covers it: a photo gets a free replacement or full refund, with nothing to send back.",
         ],
-        takeaway: "Heartbound Maps's edge: free shipping with no $75 minimum.",
+        takeaway:
+          "Heartbound Maps's edge: free shipping, protective packaging, and a damage guarantee.",
       },
       {
         id: "ease",
@@ -347,6 +359,7 @@ export const COMPETITORS: readonly Competitor[] = [
         body: [
           "Both are quick to use with a live preview. Grafomap's editor is famously a few-minutes job for a single map.",
           "Heartbound Maps is free to design with no account needed, and the layout engine does the tedious work of placing and de-cluttering labels, so even a map with many places stays fast and tidy.",
+          "The preview is also a promise: it's rendered by the same engine that prints your piece, so what you see is exactly what arrives, down to each arrow and label, with nothing changing at checkout.",
         ],
       },
     ],
@@ -355,6 +368,7 @@ export const COMPETITORS: readonly Competitor[] = [
         "You want several places on one print, measured from home",
         "Hahnemühle German Etching 310gsm fine-art paper and included digital files matter to you",
         "You want free shipping with no minimum order",
+        "You want it to arrive protected, backed by a damage guarantee with no return and no hoops",
         "You're buying a keepsake gift, not just décor",
       ],
       competitor: [
@@ -365,7 +379,7 @@ export const COMPETITORS: readonly Competitor[] = [
       ],
     },
     verdict:
-      "Grafomap is a fine budget choice if you want one city on the wall as cheaply as possible. But Heartbound Maps is the better buy when the print is meant to mean something: it maps many places at once, each measured from home, on Hahnemühle German Etching 310gsm fine-art paper, with the digital files included and free shipping with no minimum. For a gift you want to last, Heartbound Maps is worth the higher price.",
+      "Grafomap is a fine budget choice if you want one city on the wall as cheaply as possible. But Heartbound Maps is the better buy when the print is meant to mean something: it maps many places at once, each measured from home, on Hahnemühle German Etching 310gsm fine-art paper, with the digital files included and free shipping with no minimum. It also arrives protected and backed by a damage guarantee, a photo gets a free replacement or full refund with nothing to return, where Grafomap buyers report thin packaging and slow replacements. For a gift you want to last, Heartbound Maps is worth the higher price.",
     faq: [
       {
         q: "Can Grafomap put multiple locations on one poster?",
@@ -387,11 +401,23 @@ export const COMPETITORS: readonly Competitor[] = [
         q: "Is Grafomap the same as CanvasDiscount now?",
         a: "As of our review, grafomap.com's custom-map product runs through CanvasDiscount, a US discount-print company. Check their site for current ownership, pricing and materials.",
       },
+      {
+        q: "Does Grafomap refund or replace a damaged print?",
+        a: "Grafomap advertises a money-back and price-match guarantee, but some customers report being asked to destroy the damaged print for photos and then waiting weeks, or going unanswered, for the refund or reprint. Heartbound Maps's damage guarantee is simpler: send a photo and get a free replacement or full refund, keep the original, nothing to return.",
+      },
+      {
+        q: "Do Grafomap prints arrive creased or damaged?",
+        a: "Most arrive fine, but a recurring theme in reviews is thin packaging (stretch wrap with no bubble or corner protection) that lets prints reach buyers creased, bent, or with frayed edges. Heartbound Maps ships every print in protective packaging that opens well, and any damaged arrival is covered by the guarantee: a free replacement or full refund, with nothing to send back.",
+      },
+      {
+        q: "Is Grafomap's customer service responsive?",
+        a: "Reviews are mixed: several customers report friendly initial contact but slow or no follow-up once they ask for a refund or a replacement on a damaged order, including bounced-back emails. Heartbound Maps keeps the after-sale simple by policy, a photo gets a free replacement or full refund with no return required.",
+      },
     ],
     meta: {
       title: "Heartbound Maps vs Grafomap: Custom Map Print Comparison",
       description:
-        "Heartbound Maps vs Grafomap: a measured multi-place map on Hahnemühle German Etching 310gsm vs an affordable single-location poster on photo paper.",
+        "Heartbound Maps vs Grafomap: a measured multi-place map on fine-art paper, shipped protected with a damage guarantee, vs a cheap single-location photo poster.",
     },
   },
 
